@@ -1,12 +1,30 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAlert } from "@/components/AlertProvider";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordFallback />}>
+      <ResetPasswordPageInner />
+    </Suspense>
+  );
+}
+
+function ResetPasswordFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#FBF9F6] p-4">
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-stone-100 text-center text-stone-500">
+        กำลังเตรียมแบบฟอร์มตั้งรหัสผ่าน...
+      </div>
+    </div>
+  );
+}
+
+function ResetPasswordPageInner() {
   const { showAlert } = useAlert();
   const router = useRouter();
   const searchParams = useSearchParams();
