@@ -21,7 +21,7 @@ const CATEGORIES = [
 export default function AdminPage() {
   const router = useRouter();
   const { showAlert } = useAlert();
-  const { user } = useSupabaseAuth();
+  const { user, isLoading } = useSupabaseAuth();
 
   // --- State ---
   const [name, setName] = useState("");
@@ -116,8 +116,7 @@ export default function AdminPage() {
   useEffect(() => {
     let mounted = true;
 
-    // ถ้ายังไม่รู้ว่า user = อะไร (undefined) => รอก่อน ห้าม redirect
-    if (user === undefined) return;
+    if (isLoading) return;
 
     const checkAdmin = async () => {
       // user = null → ยังไม่ล็อกอิน
@@ -167,7 +166,7 @@ export default function AdminPage() {
     return () => {
       mounted = false;
     };
-  }, [user, router]);
+  }, [user, router, isLoading, showAlert]);
 
   // --- fetchProducts with mounted guard ---
   async function fetchProducts() {

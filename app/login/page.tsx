@@ -9,17 +9,18 @@ import { useAlert } from "@/components/AlertProvider";
 
 export default function LoginPage() {
   const { showAlert } = useAlert();
-  const { user } = useSupabaseAuth(); //ดึง user จาก Auth Hook มาเช็ค
+  const { user, isLoading } = useSupabaseAuth(); //ดึง user จาก Auth Hook มาเช็ค
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
+    if (isLoading) return;
     if (user) {
       router.replace("/"); // ใช้ replace เพื่อไม่ให้กด Back กลับมาได้
     }
-  }, [user, router]);
+  }, [user, router, isLoading]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -118,15 +119,25 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* ปุ่ม Sign up (Secondary Button) */}
-        <div className="text-center space-y-4">
+        <Link href="/signup">
           <button
-            onClick={handleSignup}
+            type="button"
             disabled={loading}
             className="w-full py-3 bg-white border-2 border-stone-200 text-stone-600 font-bold rounded-lg hover:bg-stone-50 hover:border-stone-300 transition-all duration-300"
           >
-            <Link href="/signup">สมัครสมาชิกใหม่ </Link>
+            สมัครสมาชิกใหม่
           </button>
+        </Link>
+
+        <div className="mt-6">
+          <div className="text-sm text-stone-500">
+            <Link
+              href="/forgot-password"
+              className="hover:text-stone-800 underline"
+            >
+              ลืมรหัสผ่าน?
+            </Link>
+          </div>
 
           <div className="text-sm text-stone-500">
             <Link href="/" className="hover:text-stone-800 underline">
