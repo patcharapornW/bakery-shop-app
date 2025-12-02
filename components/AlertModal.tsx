@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { AlertTriangle, Check, Info } from "lucide-react";
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -13,6 +14,21 @@ interface AlertModalProps {
   okText?: string;
   cancelText?: string;
 }
+
+const toneMap = {
+  success: {
+    icon: Check,
+    wrapper: "bg-green-100 text-green-600",
+  },
+  error: {
+    icon: AlertTriangle,
+    wrapper: "bg-red-100 text-red-600",
+  },
+  info: {
+    icon: Info,
+    wrapper: "bg-stone-100 text-stone-600",
+  },
+} as const;
 
 export default function AlertModal({
   isOpen,
@@ -27,26 +43,17 @@ export default function AlertModal({
 }: AlertModalProps) {
   if (!isOpen) return null;
 
+  const Icon = toneMap[type].icon;
+  const toneClass = toneMap[type].wrapper;
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-stone-100 text-center animate-in zoom-in-95 duration-200 scale-100">
         {/* ไอคอนแสดงอารมณ์ */}
         <div className="mb-4 flex justify-center">
-          {type === "success" && (
-            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-2xl">
-              ✅
-            </div>
-          )}
-          {type === "error" && (
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-2xl">
-              ⚠️
-            </div>
-          )}
-          {type === "info" && (
-            <div className="w-12 h-12 bg-stone-100 text-stone-600 rounded-full flex items-center justify-center text-2xl">
-              ℹ️
-            </div>
-          )}
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${toneClass}`}>
+            <Icon className="w-6 h-6" strokeWidth={2.5} />
+          </div>
         </div>
 
         <h3 className="text-xl font-bold text-stone-800 mb-2">{title}</h3>

@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useSupabaseAuth } from "@/components/useSupabaseAuth";
 import { useAlert } from "@/components/AlertProvider";
+import { motion } from "framer-motion";
+import { CreditCard, MapPin, Navigation, ShoppingBag } from "lucide-react";
 
 // Define Types
 interface CartItem {
@@ -117,9 +119,10 @@ export default function CheckoutPage() {
 
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
-    setCouponMessage({ text: "กรุณากรอกโค้ด", type: "error" });
-
-    if (!code) return;
+    if (!code) {
+      setCouponMessage({ text: "กรุณากรอกโค้ด", type: "error" });
+      return;
+    }
 
     if (code === "HBD10") {
       const discountValue = subTotal * 0.1;
@@ -157,7 +160,7 @@ export default function CheckoutPage() {
       }
     } else {
       setDiscount(0);
-      setCouponMessage({ text: "❌ ไม่พบโค้ดส่วนลดนี้", type: "error" });
+      setCouponMessage({ text: "ไม่พบโค้ดส่วนลดนี้", type: "error" });
     }
   };
 
@@ -235,9 +238,9 @@ export default function CheckoutPage() {
 
       showAlert(
         "สั่งซื้อสำเร็จ! ",
-        "ขอบคุณที่อุดหนุนค่ะ ทางร้านจะรีบดำเนินการจัดส่งให้เร็วที่สุด",
+        "ขอบคุณที่อุดหนุนค่ะ สามารถติดตามสถานะและรายละเอียดคำสั่งซื้อได้ที่หน้าประวัติคำสั่งซื้อ",
         "success",
-        () => router.push("/") // ฟังก์ชันนี้จะทำงานเมื่อกดปุ่ม "ตกลง" ใน Modal
+        () => router.push("/orders")
       );
     } catch (error) {
       console.error(error);
@@ -266,13 +269,19 @@ export default function CheckoutPage() {
     );
 
   return (
-    <div className="min-h-screen bg-[#FBF9F6] py-10 px-4">
+    <motion.div
+      className="min-h-screen bg-[#FBF9F6] py-10 px-4"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* --- ฝั่งซ้าย --- */}
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-            <h2 className="text-xl font-bold text-stone-800 mb-4">
-              📍 ที่อยู่จัดส่ง
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-stone-100">
+            <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-stone-500" />
+              ที่อยู่จัดส่ง
             </h2>
             <form
               id="checkout-form"
@@ -346,9 +355,10 @@ export default function CheckoutPage() {
                     href="https://www.google.com/maps"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="whitespace-nowrap px-3 py-3 bg-white border border-stone-300 text-stone-600 rounded-xl text-sm font-bold hover:bg-stone-100 transition-colors"
+                    className="whitespace-nowrap px-3 py-3 bg-white border border-stone-300 text-stone-600 rounded-xl text-sm font-bold hover:bg-stone-100 transition-colors flex items-center gap-1"
                   >
-                    📍 เช็คระยะทาง
+                    <Navigation className="w-4 h-4" />
+                    เช็คระยะทาง
                   </a>
                 </div>
               </div>
@@ -371,9 +381,10 @@ export default function CheckoutPage() {
             </form>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-            <h2 className="text-xl font-bold text-stone-800 mb-4">
-              💸 ชำระเงิน
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-stone-100">
+            <h2 className="text-2xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-stone-500" />
+              ชำระเงิน
             </h2>
             <div className="bg-stone-800 text-white p-4 rounded-xl mb-4">
               <p className="text-sm opacity-80">โอนเงินเข้าบัญชี</p>
@@ -401,9 +412,10 @@ export default function CheckoutPage() {
         </div>
 
         {/* --- ฝั่งขวา: สรุป --- */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 h-fit sticky top-24">
-          <h2 className="text-xl font-bold text-stone-800 mb-4">
-            🛍️ สรุปคำสั่งซื้อ
+        <div className="bg-white p-6 rounded-2xl shadow-lg/30 border border-stone-100 h-fit sticky top-24">
+          <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5 text-stone-500" />
+            สรุปคำสั่งซื้อ
           </h2>
 
           <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -540,11 +552,11 @@ export default function CheckoutPage() {
             {submitting ? (
               <div className="w-6 h-6 border-2 border-stone-500 border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              "✅ ยืนยันการสั่งซื้อ"
+              "ยืนยันการสั่งซื้อ"
             )}
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useSupabaseAuth } from "@/components/useSupabaseAuth";
 import { useAlert } from "@/components/AlertProvider";
+import { Boxes, Camera, Palette, PencilLine, Plus } from "lucide-react";
 
 // หมวดหมู่สินค้า (ต้องตรงกับหน้า Menu)
 const CATEGORIES = [
@@ -246,7 +247,7 @@ export default function AdminPage() {
         const { error } = await supabase.from("products").insert([productData]);
         if (error) throw error;
         showAlert(
-          "เพิ่มสำเร็จ! ✨",
+          "เพิ่มสินค้าสำเร็จ",
           `เพิ่มสินค้า ${name} เข้าสู่เมนูเรียบร้อยแล้ว`,
           "success"
         ); // ✅ แทนที่ alert
@@ -330,7 +331,17 @@ export default function AdminPage() {
         <div className="lg:col-span-1">
           <div className="sticky top-24">
             <h1 className="text-2xl font-bold text-stone-800 mb-6 flex items-center gap-2">
-              {editingProduct ? "✏️ แก้ไขสินค้า" : "➕ เพิ่มสินค้าใหม่"}
+              {editingProduct ? (
+                <>
+                  <PencilLine className="w-5 h-5 text-stone-500" />
+                  แก้ไขสินค้า
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 text-stone-500" />
+                  เพิ่มสินค้าใหม่
+                </>
+              )}
             </h1>
 
             <form
@@ -406,7 +417,7 @@ export default function AdminPage() {
                 </label>
                 <label className="w-full flex items-center justify-center px-4 py-8 border-2 border-dashed border-stone-300 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors">
                   <div className="text-center">
-                    <span className="text-3xl block mb-2">📷</span>
+                    <Camera className="w-8 h-8 mx-auto mb-2 text-stone-400" />
                     <span className="text-sm text-stone-500 truncate max-w-[200px] block">
                       {image ? image.name : "คลิกเพื่อเลือกรูปภาพ"}
                     </span>
@@ -437,9 +448,10 @@ export default function AdminPage() {
                 />
                 <label
                   htmlFor="isCustom"
-                  className="ml-3 block text-sm font-medium text-stone-700 cursor-pointer select-none"
+                  className="ml-3 block text-sm font-medium text-stone-700 cursor-pointer select-none flex items-center gap-2"
                 >
-                  เปิดให้ลูกค้าปรับแต่งหน้าเค้กได้ 🎨
+                  <Palette className="w-4 h-4 text-stone-500" />
+                  เปิดให้ลูกค้าปรับแต่งหน้าเค้กได้
                 </label>
               </div>
 
@@ -452,8 +464,8 @@ export default function AdminPage() {
                   {loading
                     ? "กำลังบันทึก..."
                     : editingProduct
-                    ? "💾 บันทึกการแก้ไข"
-                    : "✨ เพิ่มสินค้า"}
+                    ? "บันทึกการแก้ไข"
+                    : "เพิ่มสินค้า"}
                 </button>
                 {editingProduct && (
                   <button
@@ -471,8 +483,9 @@ export default function AdminPage() {
 
         {/* --- ส่วนที่ 2: รายการสินค้า --- */}
         <div className="lg:col-span-2">
-          <h1 className="text-2xl font-bold text-stone-800 mb-6">
-            📦 สินค้าทั้งหมด ({products.length})
+          <h1 className="text-2xl font-bold text-stone-800 mb-6 flex items-center gap-2">
+            <Boxes className="w-5 h-5 text-stone-500" />
+            สินค้าทั้งหมด ({products.length})
           </h1>
           {loadingProducts ? (
             <div className="text-center py-10 text-stone-500">

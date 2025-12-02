@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { Product, CustomCakePayload } from "@/types";
+import { Check, Palette, X } from "lucide-react";
 
 interface CustomCakeModalProps {
   open: boolean;
@@ -13,12 +14,12 @@ interface CustomCakeModalProps {
 
 // รายการ Topping
 const TOPPINGS = [
-  { id: "strawberry", label: "🍓 สตรอว์เบอร์รี" },
-  { id: "blueberry", label: "🫐 บลูเบอร์รี" },
-  { id: "almond", label: "🥜 อัลมอนด์" },
-  { id: "oreo", label: "🍪 โอริโอ้" },
-  { id: "jelly", label: "🧸 เยลลี่" },
-  { id: "kitkat", label: "🍫 คิตแคต" },
+  { id: "strawberry", label: "สตรอว์เบอร์รี" },
+  { id: "blueberry", label: "บลูเบอร์รี" },
+  { id: "almond", label: "อัลมอนด์" },
+  { id: "oreo", label: "โอริโอ้" },
+  { id: "jelly", label: "เยลลี่" },
+  { id: "kitkat", label: "คิตแคต" },
 ];
 
 export default function CustomCakeModal({
@@ -87,13 +88,13 @@ export default function CustomCakeModal({
         {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b border-stone-100 pb-4 sticky top-0 bg-white z-10">
           <h3 className="text-2xl font-bold text-stone-800 flex items-center gap-2">
-            <span>🎨</span> ปรับแต่งเค้ก
+            <Palette className="w-5 h-5 text-stone-500" /> ปรับแต่งเค้ก
           </h3>
           <button
             onClick={onClose}
             className="text-stone-400 hover:text-stone-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -183,7 +184,9 @@ export default function CustomCakeModal({
                     <div className="flex items-center justify-between w-full">
                       <span className="text-sm font-medium">{t.label}</span>
                       {selectedToppings.includes(t.id) && (
-                        <span className="text-xs bg-white/20 px-1.5 rounded">✓</span>
+                        <span className="text-xs bg-white/20 px-1.5 rounded flex items-center">
+                          <Check className="w-3 h-3" />
+                        </span>
                       )}
                     </div>
                   </label>

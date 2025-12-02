@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useAlert } from "@/components/AlertProvider";
+import { Camera } from "lucide-react";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -105,7 +106,7 @@ export default function SignupPage() {
                 {imagePreview ? (
                   <Image src={imagePreview} alt="Preview" fill className="object-cover" />
                 ) : (
-                  <span className="text-3xl text-stone-400">📷</span>
+                  <Camera className="w-8 h-8 text-stone-400" />
                 )}
               </div>
               <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold">

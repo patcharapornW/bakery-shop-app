@@ -7,20 +7,31 @@ import CustomCakeModal from "@/components/CustomCakeModal";
 import { useSupabaseAuth } from "@/components/useSupabaseAuth";
 import type { Product, CustomCakePayload } from "@/types";
 import { useAlert } from "@/components/AlertProvider";
+import { motion } from "framer-motion";
+import { useSearchParams } from "next/navigation";
+import {
+  CakeSlice,
+  Candy,
+  Cookie,
+  Croissant,
+  IceCream,
+  Sparkles,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-// ✅ 1. กำหนดรายการหมวดหมู่ (id ต้องตรงกับใน Database)
-const CATEGORIES = [
-  { id: "all", label: "ทั้งหมด" },
-  { id: "cake", label: "🍰 เค้ก" },
-  { id: "cookie", label: "🍪 คุกกี้" },
-  { id: "tart", label: "🥧 ทาร์ต" },
-  { id: "cupcake", label: "🧁 คัพเค้ก" },
-  { id: "macaron", label: "🍬 มาการอง" },
-  { id: "other", label: "✨ อื่นๆ" },
+const CATEGORIES: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: "all", label: "ทั้งหมด", icon: Sparkles },
+  { id: "cake", label: "เค้ก", icon: CakeSlice },
+  { id: "cookie", label: "คุกกี้", icon: Cookie },
+  { id: "tart", label: "ทาร์ต", icon: Croissant },
+  { id: "cupcake", label: "คัพเค้ก", icon: IceCream },
+  { id: "macaron", label: "มาการอง", icon: Candy },
+  { id: "other", label: "เมนูพิเศษ", icon: Sparkles },
 ];
 
 export default function MenuPage() {
   const { showAlert } = useAlert();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [openCustom, setOpenCustom] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
@@ -30,6 +41,15 @@ export default function MenuPage() {
 
   // ✅ 2. เพิ่ม State สำหรับเก็บหมวดหมู่ที่เลือก (ค่าเริ่มต้นคือ 'all')
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    // Get search query from URL
+    const search = searchParams.get("search");
+    if (search) {
+      queueMicrotask(() => setSearchQuery(search));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     let mounted = true;
@@ -52,10 +72,24 @@ export default function MenuPage() {
     };
   }, []);
 
-  // ✅ 3. ฟังก์ชันกรองสินค้า
+  // ✅ 3. ฟังก์ชันกรองสินค้า (รวมการค้นหา)
   const filteredProducts = products.filter((product) => {
-    if (selectedCategory === "all") return true; // ถ้าเลือกทั้งหมด ให้โชว์ทุกตัว
-    return product.category === selectedCategory; // ถ้าเลือกหมวดอื่น ให้เช็คว่าตรงกันมั้ย
+    // Filter by category
+    if (selectedCategory !== "all" && product.category !== selectedCategory) {
+      return false;
+    }
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        product.name.toLowerCase().includes(query) ||
+        product.description?.toLowerCase().includes(query) ||
+        product.category?.toLowerCase().includes(query)
+      );
+    }
+    
+    return true;
   });
 
   const openForCustom = (product: Product) => {
@@ -92,7 +126,7 @@ export default function MenuPage() {
     } else {
       setOpenCustom(false);
       showAlert(
-        "เพิ่มสำเร็จ! 🛒",
+        "เพิ่มสินค้าสำเร็จ",
         "เพิ่มสินค้าลงในตะกร้าเรียบร้อยแล้ว",
         "success"
       ); 
@@ -111,14 +145,28 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-10 min-h-screen">
+    <motion.div
+      className="container mx-auto px-4 py-10 min-h-screen"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-stone-800 mb-2">
           สินค้าทั้งหมด
         </h1>
-        <p className="text-stone-500 text-lg">
-          เลือกความอร่อยที่คุณชื่นชอบได้เลย
-        </p>
+        {searchQuery ? (
+          <p className="text-stone-600 text-lg">
+            ผลการค้นหา: <span className="font-bold text-stone-900">&ldquo;{searchQuery}&rdquo;</span>
+            {filteredProducts.length > 0 && (
+              <span className="text-stone-500"> ({filteredProducts.length} รายการ)</span>
+            )}
+          </p>
+        ) : (
+          <p className="text-stone-500 text-lg">
+            เลือกความอร่อยที่คุณชื่นชอบได้เลย
+          </p>
+        )}
       </div>
 
       {/* ✅ 4. แถบเลือกหมวดหมู่ (Scroll แนวนอนได้ในมือถือ) */}
@@ -128,15 +176,18 @@ export default function MenuPage() {
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
             className={`
-              px-5 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap shadow-sm
+              px-5 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap shadow-sm border
               ${
                 selectedCategory === cat.id
-                  ? "bg-stone-800 text-white scale-105 shadow-md" // สถานะที่เลือกอยู่
-                  : "bg-white text-stone-600 border border-stone-200 hover:bg-stone-100 hover:border-stone-300" // สถานะปกติ
+                  ? "bg-stone-900 text-white scale-105 shadow-md border-stone-900" // สถานะที่เลือกอยู่
+                  : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100 hover:border-stone-300" // สถานะปกติ
               }
             `}
           >
-            {cat.label}
+            <span className="inline-flex items-center gap-2">
+              <cat.icon className="w-4 h-4" />
+              {cat.label}
+            </span>
           </button>
         ))}
       </div>
@@ -168,6 +219,6 @@ export default function MenuPage() {
         onAddCustom={handleAddCustom}
         isAdding={isAdding}
       />
-    </div>
+    </motion.div>
   );
 }

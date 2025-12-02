@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useSupabaseAuth } from "@/components/useSupabaseAuth";
 import { useAlert } from "@/components/AlertProvider";
+import { UserRound } from "lucide-react";
 
 export default function ProfilePage() {
   const { user } = useSupabaseAuth();
@@ -81,17 +82,13 @@ export default function ProfilePage() {
 
       if (updateError) throw updateError;
 
-      showAlert(
-        "บันทึกข้อมูลสำเร็จ! 🎉",
-        "อัปเดตข้อมูลโปรไฟล์เรียบร้อยแล้ว",
-        {
-          type: "success",
-          onOk: () => {
-            router.refresh();
-            window.location.reload();
-          },
-        }
-      );
+      showAlert("บันทึกข้อมูลสำเร็จ", "อัปเดตข้อมูลโปรไฟล์เรียบร้อยแล้ว", {
+        type: "success",
+        onOk: () => {
+          router.refresh();
+          window.location.reload();
+        },
+      });
     } catch (error) {
       console.error(error);
       showAlert("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลโปรไฟล์ได้", "error");
@@ -123,7 +120,9 @@ export default function ProfilePage() {
                 {imagePreview ? (
                   <Image src={imagePreview} alt="Avatar" fill className="object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-4xl text-stone-300">👤</div>
+                  <div className="w-full h-full flex items-center justify-center text-stone-300">
+                    <UserRound className="w-12 h-12" />
+                  </div>
                 )}
               </div>
               
@@ -186,7 +185,7 @@ export default function ProfilePage() {
                 disabled={loading}
                 className="sm:flex-[2] py-3 bg-stone-800 text-white font-bold rounded-xl shadow-md hover:bg-stone-900 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
               >
-                {loading ? "กำลังบันทึก..." : "💾 บันทึกการแก้ไข"}
+                {loading ? "กำลังบันทึก..." : "บันทึกการแก้ไข"}
               </button>
             </div>
 

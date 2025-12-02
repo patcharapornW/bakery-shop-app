@@ -6,14 +6,34 @@ import { supabase } from "@/lib/supabaseClient";
 import AuthForm from "./AuthForm";
 import { useSupabaseAuth } from "./useSupabaseAuth";
 import Image from "next/image";
-// ✅ 1. นำเข้า Type ที่ถูกต้องจาก supabase-js
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import {
+  LogOut,
+  PencilLine,
+  ReceiptText,
+  ShieldCheck,
+  ShoppingBag,
+  Search,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export const Navbar = () => {
   const { user } = useSupabaseAuth();
+  const router = useRouter();
   const [showAuth, setShowAuth] = useState(false);
   const [cartCount, setCartCount] = useState<number>(0);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/menu?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearch(false);
+      setSearchQuery("");
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -95,52 +115,51 @@ export const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 h-20 flex items-center shadow-sm">
+      <nav className="bg-white/85 backdrop-blur border-b border-stone-100 sticky top-0 z-50 h-20 flex items-center shadow-sm">
         <div className="container mx-auto px-6 flex justify-between items-center w-full">
           <Link
             href="/"
-            className="text-3xl font-bold text-black tracking-wide font-sans"
+            className="text-3xl font-bold text-stone-900 tracking-tight"
           >
             Baan Kanom
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8 font-bold text-gray-800">
-            <Link href="/" className="hover:text-black transition-colors">
+          <div className="hidden md:flex items-center space-x-6 font-semibold text-stone-600">
+            <Link href="/" className="hover:text-stone-950 transition-colors">
               หน้าแรก
             </Link>
-            <Link href="/menu" className="hover:text-black transition-colors">
+            <Link
+              href="/menu"
+              className="hover:text-stone-950 transition-colors"
+            >
               สินค้าทั้งหมด
             </Link>
             <Link
               href="/promotion"
-              className="hover:text-black transition-colors"
+              className="hover:text-stone-950 transition-colors"
             >
               โปรโมชั่น
             </Link>
             <Link
               href="/contact"
-              className="hover:text-black transition-colors"
+              className="hover:text-stone-950 transition-colors"
             >
               ติดต่อเรา
             </Link>
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            {/* Search Button */}
+            <button
+              onClick={() => setShowSearch(true)}
+              className="p-2 rounded-full hover:bg-stone-100 transition-colors group"
+              aria-label="ค้นหาเมนู"
+            >
+              <Search className="h-6 w-6 text-stone-700 group-hover:text-stone-900 transition-colors" />
+            </button>
+
             <Link href="/cart" className="relative group">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-7 w-7 text-black group-hover:text-gray-600 transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
+              <ShoppingBag className="h-7 w-7 text-stone-900 group-hover:text-stone-600 transition-colors" />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {cartCount}
@@ -169,7 +188,7 @@ export const Navbar = () => {
                   {userName}
                 </span>
 
-                <div className="absolute right-0 top-full mt-0 w-48 bg-white rounded-xl shadow-xl border border-stone-100 overflow-hidden hidden group-hover:block z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 top-full mt-0 w-56 bg-white rounded-xl shadow-xl border border-stone-100 overflow-hidden hidden group-hover:block z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="px-4 py-3 border-b border-stone-50 bg-stone-50/50">
                     <p className="text-xs text-stone-400 font-medium">
                       เข้าสู่ระบบโดย
@@ -183,7 +202,14 @@ export const Navbar = () => {
                     href="/profile"
                     className="px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors flex items-center gap-2"
                   >
-                    <span>✏️</span> แก้ไขโปรไฟล์
+                  <PencilLine className="w-4 h-4" /> แก้ไขโปรไฟล์
+                  </Link>
+
+                  <Link
+                    href="/orders"
+                    className="px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors flex items-center gap-2 border-t border-stone-50"
+                  >
+                  <ReceiptText className="w-4 h-4" /> ประวัติการสั่งซื้อ
                   </Link>
 
                   {isAdmin && (
@@ -191,7 +217,7 @@ export const Navbar = () => {
                       href="/admin"
                       className="px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-800 transition-colors flex items-center gap-2 border-t border-stone-50"
                     >
-                      <span>🛠️</span> จัดการสินค้า
+                    <ShieldCheck className="w-4 h-4" /> จัดการสินค้า
                     </Link>
                   )}
 
@@ -199,14 +225,14 @@ export const Navbar = () => {
                     onClick={handleSignOut}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-stone-50"
                   >
-                    <span>🚪</span> ออกจากระบบ
+                  <LogOut className="w-4 h-4" /> ออกจากระบบ
                   </button>
                 </div>
               </div>
             ) : (
               <Link
                 href="/login"
-                className="text-sm font-medium text-black hover:text-gray-600"
+                className="text-sm font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-full px-5 py-2 shadow-sm transition-colors"
               >
                 เข้าสู่ระบบ
               </Link>
@@ -219,6 +245,54 @@ export const Navbar = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-2xl">
             <AuthForm onClose={() => setShowAuth(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Search Modal */}
+      {showSearch && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 md:pt-32 z-50 p-4"
+          onClick={() => setShowSearch(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="ค้นหาเมนูขนม..."
+                    className="w-full pl-12 pr-4 py-4 bg-stone-50 border-2 border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-stone-400 focus:border-transparent text-stone-900 text-lg"
+                    autoFocus
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-6 py-4 bg-stone-900 text-white font-bold rounded-xl hover:bg-stone-800 transition-colors shadow-lg"
+                >
+                  ค้นหา
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSearch(false);
+                    setSearchQuery("");
+                  }}
+                  className="px-4 py-4 bg-stone-100 text-stone-700 font-bold rounded-xl hover:bg-stone-200 transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+              <p className="text-sm text-stone-500 text-center">
+                กด Enter หรือคลิกปุ่มค้นหาเพื่อค้นหาเมนู
+              </p>
+            </form>
           </div>
         </div>
       )}

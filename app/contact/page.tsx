@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAlert } from "@/components/AlertProvider";
+import { Clock3, Map as MapIcon, MapPin, MessageCircle, Phone } from "lucide-react";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -34,7 +35,9 @@ export default function ContactPage() {
             
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-xl">📍</div>
+                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                  <MapPin className="w-5 h-5" />
+                </div>
                 <div>
                   <h4 className="font-bold text-stone-700">ที่อยู่ร้าน</h4>
                   <p className="text-stone-600 text-sm mt-1">
@@ -44,7 +47,9 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-xl">📞</div>
+                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                  <Phone className="w-5 h-5" />
+                </div>
                 <div>
                   <h4 className="font-bold text-stone-700">เบอร์โทรศัพท์</h4>
                   <p className="text-stone-600 text-sm mt-1">081-234-5678</p>
@@ -52,7 +57,9 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-xl">💬</div>
+                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                  <MessageCircle className="w-5 h-5" />
+                </div>
                 <div>
                   <h4 className="font-bold text-stone-700">LINE Official</h4>
                   <p className="text-stone-600 text-sm mt-1">@baankanom</p>
@@ -60,7 +67,9 @@ export default function ContactPage() {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-xl">⏰</div>
+                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
+                  <Clock3 className="w-5 h-5" />
+                </div>
                 <div>
                   <h4 className="font-bold text-stone-700">เวลาทำการ</h4>
                   <p className="text-stone-600 text-sm mt-1">เปิดทุกวัน: 08:00 - 20:00 น.</p>
@@ -70,7 +79,10 @@ export default function ContactPage() {
 
             {/* แผนที่จำลอง */}
             <div className="mt-8 h-48 w-full bg-stone-200 rounded-xl flex items-center justify-center overflow-hidden relative">
-               <div className="absolute text-stone-500 font-bold">🗺️ แผนที่ Google Maps</div>
+               <div className="absolute text-stone-500 font-bold flex items-center gap-2">
+                 <MapIcon className="w-5 h-5" />
+                 แผนที่ Google Maps
+               </div>
                {/* ถ้าจะใส่ iframe ของ Google Maps จริงๆ ให้ใส่ตรงนี้ */}
             </div>
           </div>

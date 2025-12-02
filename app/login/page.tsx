@@ -67,7 +67,7 @@ export default function LoginPage() {
           <h1 className="text-3xl font-bold text-stone-800 mb-2">
             ยินดีต้อนรับ
           </h1>
-          <p className="text-stone-500">เข้าสู่ระบบเพื่อสั่งขนมอร่อยๆ 🥐</p>
+          <p className="text-stone-500">เข้าสู่ระบบเพื่อสั่งขนมอร่อยๆ </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5">
@@ -134,7 +134,7 @@ export default function LoginPage() {
         </Link>
 
         <div className="mt-6">
-          <div className="text-sm text-stone-500">
+          <div className="text-sm text-center text-stone-500">
             <Link
               href="/forgot-password"
               className="hover:text-stone-800 underline"
@@ -143,7 +143,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          <div className="text-sm text-stone-500">
+          <div className="text-sm text-center text-stone-500">
             <Link href="/" className="hover:text-stone-800 underline">
               กลับไปหน้าหลัก
             </Link>
