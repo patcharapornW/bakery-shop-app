@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { ProductCard } from "@/components/ProductCard";
 import CustomCakeModal from "@/components/CustomCakeModal";
@@ -34,25 +34,33 @@ const CATEGORIES: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "other", label: "เมนูพิเศษ", icon: Sparkles },
 ];
 
-export default function MenuPage() {
+// Component สำหรับอ่าน search params (ต้อง wrap ด้วย Suspense)
+function SearchQueryHandler({
+  onSearchChange,
+}: {
+  onSearchChange: (query: string) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const search = searchParams.get("search");
+    if (search) {
+      queueMicrotask(() => onSearchChange(search));
+    }
+  }, [searchParams, onSearchChange]);
+
+  return null;
+}
+
+function MenuPageContent({ searchQuery }: { searchQuery: string }) {
   const { showAlert } = useAlert();
   const { user } = useSupabaseAuth();
-  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [openCustom, setOpenCustom] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // อ่านคำค้นหาจาก URL
-  useEffect(() => {
-    const search = searchParams.get("search");
-    if (search) {
-      queueMicrotask(() => setSearchQuery(search));
-    }
-  }, [searchParams]);
 
   // ดึงข้อมูลสินค้าทั้งหมด
   useEffect(() => {
@@ -229,5 +237,30 @@ export default function MenuPage() {
         isAdding={isAdding}
       />
     </motion.div>
+  );
+}
+
+// Main component ที่ wrap ด้วย Suspense
+export default function MenuPage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-stone-600">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 border-4 border-stone-300 border-t-stone-600 rounded-full animate-spin"></div>
+            <p>กำลังโหลด...</p>
+          </div>
+        </div>
+      }
+    >
+      <SearchQueryHandler onSearchChange={handleSearchChange} />
+      <MenuPageContent searchQuery={searchQuery} />
+    </Suspense>
   );
 }
