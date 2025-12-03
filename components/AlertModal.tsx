@@ -49,9 +49,11 @@ export default function AlertModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-stone-100 text-center animate-in zoom-in-95 duration-200 scale-100">
-        {/* ไอคอนแสดงอารมณ์ */}
+        {/* ไอคอน */}
         <div className="mb-4 flex justify-center">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${toneClass}`}>
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center ${toneClass}`}
+          >
             <Icon className="w-6 h-6" strokeWidth={2.5} />
           </div>
         </div>

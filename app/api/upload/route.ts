@@ -14,12 +14,12 @@ export async function POST(req: Request) {
       if (!body.user_id) {
         return NextResponse.json({ error: "missing user_id" }, { status: 400 });
       }
-
+      // ลบข้อมูลจากตะกร้า
       const { error } = await supabaseAdmin
         .from("cart_items")
         .delete()
         .eq("user_id", body.user_id);
-
+      // ลบข้อมูลไม่สำเร็จ ไม่ต้องยกเลิกการทำงานอื่น
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }

@@ -35,4 +35,3 @@ export function useSupabaseAuth() {
 
   return { user, isLoading };
 }
-

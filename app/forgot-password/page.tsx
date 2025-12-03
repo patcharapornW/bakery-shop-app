@@ -9,7 +9,7 @@ export default function ForgotPasswordPage() {
   const { showAlert } = useAlert();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-
+  // ฟังก์ชันส่งลิงก์ตั้งรหัสผ่านใหม่
   const handleReset = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!email) return;

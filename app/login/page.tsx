@@ -34,7 +34,6 @@ export default function LoginPage() {
     if (error) {
       showAlert("เข้าสู่ระบบไม่สำเร็จ", error.message, "error");
     } else {
-      // ✅ Login สำเร็จ
       showAlert("ยินดีต้อนรับ! ", "เข้าสู่ระบบเรียบร้อยแล้ว", "success", () => {
         router.push("/");
         router.refresh();
@@ -61,7 +60,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FBF9F6] p-4">
-      {/* การ์ด Login */}
       <div className="bg-white p-8 md:p-10 rounded-2xl shadow-lg w-full max-w-md border border-stone-100">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-stone-800 mb-2">
@@ -99,7 +97,7 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* ✅ ปุ่ม Login (Primary Button) */}
+          {/*  ปุ่ม Login (Primary Button) */}
           <button
             type="submit"
             disabled={loading}

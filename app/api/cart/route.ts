@@ -9,19 +9,21 @@ export async function POST(req: Request) {
   }
 
   const fileName = `cakes/${Date.now()}-${file.name}`
-
+  // อัปโหลดรูปภาพจาก storage
   const { data, error } = await supabase.storage
     .from('product-images')
     .upload(fileName, file, {
-      contentType: file.type, // ระบุ content type ให้ถูกต้องด้วย
+      contentType: file.type,
       cacheControl: '3600',
       upsert: false,
     })
 
   if (error) {
+    // อัปโหลดรูปภาพไม่สำเร็จ ไม่ต้องยกเลิกการทำงานอื่น
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // ดึง URL รูปภาพจาก storage
   const { publicUrl } = supabase.storage
     .from('product-images')
     .getPublicUrl(data.path).data

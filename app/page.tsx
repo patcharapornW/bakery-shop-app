@@ -1,3 +1,8 @@
+/**
+ * หน้าหลัก
+ * แสดง Hero Section, สินค้าแนะนำ, ข้อมูลเกี่ยวกับร้าน, และ Footer
+ */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -9,21 +14,29 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Product, CustomCakePayload } from "@/types";
 import { useAlert } from "@/components/AlertProvider";
-import { ArrowRight, MapPin, Phone, Sparkles, Award, Heart, Clock } from "lucide-react";
+import {
+  ArrowRight,
+  MapPin,
+  Phone,
+  Sparkles,
+  Award,
+  Heart,
+  Clock,
+} from "lucide-react";
 import { motion } from "framer-motion";
+
+// ========== Main Component ==========
 
 export default function HomePage() {
   const { user } = useSupabaseAuth();
   const { showAlert } = useAlert();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // --- State สำหรับ Modal ---
   const [openCustom, setOpenCustom] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  // ดึงข้อมูลสินค้าแนะนำ
+  // ดึงข้อมูลสินค้าแนะนำ 4 รายการล่าสุด
   useEffect(() => {
     async function fetchFeaturedProducts() {
       const { data, error } = await supabase
@@ -39,13 +52,13 @@ export default function HomePage() {
     fetchFeaturedProducts();
   }, []);
 
-  // ✅ ฟังก์ชันเปิด Modal (เหมือนหน้า Menu)
+  // เปิด Modal ปรับแต่งเค้ก
   const openForCustom = (product: Product) => {
     setSelected(product);
     setOpenCustom(true);
   };
 
-  // ✅ ฟังก์ชันเพิ่มสินค้า Custom (เหมือนหน้า Menu)
+  // เพิ่มเค้กที่ปรับแต่งแล้วลงตะกร้า
   const handleAddCustom = async (payload: CustomCakePayload) => {
     if (!user)
       return showAlert(
@@ -79,13 +92,11 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col"> {/* ✅ ใช้ flex-col เพื่อดัน Footer ลงล่างสุด */}
-      
-      <div className="flex-grow pb-12"> {/* เนื้อหาหลัก */}
-        
-        {/* ========== 1. Hero Section with Background Image ========== */}
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-grow pb-12">
+        {/* หน้าแรก */}
         <div className="relative w-full min-h-[90vh] flex items-center overflow-hidden">
-          {/* Background Image - Cookie decoration */}
+          {/* ภาพพื้นหลัง */}
           <div className="absolute inset-0 z-0">
             <Image
               src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=2000&auto=format&fit=crop"
@@ -94,11 +105,10 @@ export default function HomePage() {
               className="object-cover"
               priority
             />
-            {/* Dark overlay for better text readability */}
+            {/* ปุ่มกรอง */}
             <div className="absolute inset-0 bg-gradient-to-r from-stone-900/85 via-stone-800/75 to-stone-900/60"></div>
           </div>
 
-          {/* Content */}
           <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 py-20">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -106,7 +116,6 @@ export default function HomePage() {
               transition={{ duration: 0.8 }}
               className="max-w-2xl space-y-8"
             >
-              {/* Badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -117,7 +126,7 @@ export default function HomePage() {
                 <span className="text-white text-sm font-bold">SINCE 2020</span>
               </motion.div>
 
-              {/* Main Headline */}
+              {/* หัวข้อ */}
               <motion.h1
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -129,18 +138,18 @@ export default function HomePage() {
                 <span className="text-amber-200">WITH LOVE</span>
               </motion.h1>
 
-              {/* Description */}
+              {/* คำอธิบาย */}
               <motion.p
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.8 }}
                 className="text-stone-100 text-lg md:text-xl leading-relaxed max-w-xl"
               >
-                ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ คัดสรรวัตถุดิบชั้นดี 
+                ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ คัดสรรวัตถุดิบชั้นดี
                 เพื่อส่งมอบความอร่อยและความสุขให้คุณในทุกคำ
               </motion.p>
 
-              {/* CTA Buttons */}
+              {/* ปุ่มเริ่มต้น */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -165,7 +174,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ========== 2. สินค้าแนะนำ ========== */}
+        {/* สินค้า */}
         <div className="container mx-auto px-4 mt-8">
           <h2 className="text-3xl font-bold text-center text-stone-800 mb-8">
             เมนูยอดฮิต
@@ -182,7 +191,7 @@ export default function HomePage() {
                   <ProductCard
                     key={item.id}
                     product={item}
-                    onOpenCustom={openForCustom} // ✅ ส่งฟังก์ชันเปิด Modal
+                    onOpenCustom={openForCustom} // ส่งฟังก์ชันเปิด Modal
                   />
                 ))
               ) : (
@@ -206,7 +215,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ========== 3. ข้อมูลเกี่ยวกับร้าน ========== */}
+        {/* เกี่ยวกับร้าน */}
         <motion.section
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -214,7 +223,7 @@ export default function HomePage() {
           transition={{ duration: 0.6 }}
           className="relative w-full min-h-[80vh] flex items-center overflow-hidden mt-16"
         >
-          {/* Background Image - Bakery/Pastry */}
+          {/* ภาพพื้นหลัง */}
           <div className="absolute inset-0 z-0">
             <Image
               src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2000&auto=format&fit=crop"
@@ -222,11 +231,10 @@ export default function HomePage() {
               fill
               className="object-cover"
             />
-            {/* Dark overlay for better text readability */}
+            {/* ปุ่มกรอง */}
             <div className="absolute inset-0 bg-gradient-to-r from-stone-900/90 via-stone-800/80 to-stone-900/70"></div>
           </div>
 
-          {/* Content - Left side */}
           <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 py-20">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -243,16 +251,20 @@ export default function HomePage() {
               </div>
 
               <p className="text-stone-100 text-lg md:text-xl leading-relaxed">
-                ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ คัดสรรวัตถุดิบชั้นดีจากแหล่งผลิตที่เชื่อถือได้ 
+                ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ
+                คัดสรรวัตถุดิบชั้นดีจากแหล่งผลิตที่เชื่อถือได้
                 เพื่อส่งมอบความอร่อยและความสุขให้คุณในทุกคำ
               </p>
 
               <p className="text-stone-200 text-base md:text-lg leading-relaxed">
-                เราเริ่มต้นจากความรักในการทำขนม และความตั้งใจที่จะสร้างสรรค์ขนมที่มีคุณภาพ 
-                ใช้เวลาอย่างเต็มที่ในการเลือกสรรวัตถุดิบที่ดีที่สุด เพื่อให้ทุกคำที่คุณลิ้มลอง 
+                เราเริ่มต้นจากความรักในการทำขนม
+                และความตั้งใจที่จะสร้างสรรค์ขนมที่มีคุณภาพ
+                ใช้เวลาอย่างเต็มที่ในการเลือกสรรวัตถุดิบที่ดีที่สุด
+                เพื่อให้ทุกคำที่คุณลิ้มลอง
                 เต็มไปด้วยรสชาติที่หอมหวานและความประณีต
               </p>
 
+              {/* จุดเด่นของร้าน */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -264,7 +276,9 @@ export default function HomePage() {
                   <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 border border-white/30">
                     <Award className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-white mb-1 text-lg">คุณภาพสูง</h3>
+                  <h3 className="font-bold text-white mb-1 text-lg">
+                    คุณภาพสูง
+                  </h3>
                   <p className="text-sm text-stone-200">วัตถุดิบชั้นดี</p>
                 </motion.div>
 
@@ -278,7 +292,9 @@ export default function HomePage() {
                   <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-3 border border-white/30">
                     <Heart className="w-7 h-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-white mb-1 text-lg">ทำด้วยใจ</h3>
+                  <h3 className="font-bold text-white mb-1 text-lg">
+                    ทำด้วยใจ
+                  </h3>
                   <p className="text-sm text-stone-200">ใส่ใจทุกขั้นตอน</p>
                 </motion.div>
 
@@ -317,30 +333,54 @@ export default function HomePage() {
         </motion.section>
       </div>
 
-      {/* ========== 4. Footer ========== */}
+      {/* Footer */}
       <footer className="bg-stone-800 text-stone-300 py-12 mt-auto">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-          
-          {/* Column 1: Logo & Description */}
+          {/* Column 1: Logo & คำอธิบาย */}
           <div>
-            <h3 className="text-2xl font-bold text-white mb-4 font-sans tracking-wide">Baan Kanom</h3>
+            <h3 className="text-2xl font-bold text-white mb-4 font-sans tracking-wide">
+              Baan Kanom
+            </h3>
             <p className="text-sm leading-relaxed">
-              ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ คัดสรรวัตถุดิบชั้นดี เพื่อส่งมอบความอร่อยและความสุขให้คุณในทุกคำ
+              ร้านขนมโฮมเมดที่ใส่ใจทุกขั้นตอนการทำ คัดสรรวัตถุดิบชั้นดี
+              เพื่อส่งมอบความอร่อยและความสุขให้คุณในทุกคำ
             </p>
           </div>
 
-          {/* Column 2: Quick Links */}
+          {/* Column 2: ลิงก์รวดเร็ว */}
           <div>
             <h4 className="text-lg font-bold text-white mb-4">เมนูลัด</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-white transition-colors">หน้าแรก</Link></li>
-              <li><Link href="/menu" className="hover:text-white transition-colors">สินค้าทั้งหมด</Link></li>
-              <li><Link href="/cart" className="hover:text-white transition-colors">ตะกร้าสินค้า</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">ติดตามสถานะคำสั่งซื้อ</Link></li>
+              <li>
+                <Link href="/" className="hover:text-white transition-colors">
+                  หน้าแรก
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/menu"
+                  className="hover:text-white transition-colors"
+                >
+                  สินค้าทั้งหมด
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/cart"
+                  className="hover:text-white transition-colors"
+                >
+                  ตะกร้าสินค้า
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  ติดตามสถานะคำสั่งซื้อ
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Column 3: Contact */}
+          {/* Column 3: ติดต่อเรา */}
           <div>
             <h4 className="text-lg font-bold text-white mb-4">ติดต่อเรา</h4>
             <ul className="space-y-2 text-sm">
@@ -363,7 +403,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* ✅ ใส่ Modal ไว้ที่นี่ */}
       <CustomCakeModal
         open={openCustom}
         onClose={() => setOpenCustom(false)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react"; // ✅ เพิ่ม useRef
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -12,10 +12,9 @@ export default function ProfilePage() {
   const { user } = useSupabaseAuth();
   const router = useRouter();
   const { showAlert } = useAlert();
-  
-  // ✅ ใช้ useRef เพื่อควบคุม input file
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ใช้ useRef เพื่อควบคุม input file
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -30,7 +29,7 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  // ✅ ฟังก์ชันคลิกที่รูป -> ไปคลิก input file
+  //  ฟังก์ชันคลิกที่รูป -> ไปคลิก input file
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
@@ -69,7 +68,7 @@ export default function ProfilePage() {
         const { data: publicUrlData } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
-        
+
         avatarUrl = publicUrlData.publicUrl;
       }
 
@@ -97,35 +96,41 @@ export default function ProfilePage() {
     }
   };
 
-  if (!user) return <div className="text-center py-20 text-stone-500">กำลังโหลดข้อมูล...</div>;
+  if (!user)
+    return (
+      <div className="text-center py-20 text-stone-500">กำลังโหลดข้อมูล...</div>
+    );
 
   return (
-    <div className="min-h-screen bg-[#FBF9F6] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#fbf4eb] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-md border border-stone-100 overflow-hidden">
-        
         <div className="bg-stone-800 p-6 text-white text-center">
           <h1 className="text-2xl font-bold">แก้ไขโปรไฟล์ส่วนตัว</h1>
           <p className="text-stone-300 text-sm mt-1">จัดการข้อมูลบัญชีของคุณ</p>
         </div>
 
         <form onSubmit={handleUpdateProfile} className="p-8 space-y-6">
-          
-          {/* ✅ ส่วนรูปโปรไฟล์ (แก้ไขใหม่) */}
+          {/* ส่วนรูปโปรไฟล์ (แก้ไขใหม่) */}
           <div className="flex flex-col items-center">
-            <div 
+            <div
               className="relative group cursor-pointer"
-              onClick={handleAvatarClick} // ✅ ใช้ onClick แทนการซ่อน input ไว้ข้างใน
+              onClick={handleAvatarClick}
             >
               <div className="w-32 h-32 rounded-full border-4 border-stone-100 overflow-hidden bg-stone-50 shadow-inner relative">
                 {imagePreview ? (
-                  <Image src={imagePreview} alt="Avatar" fill className="object-cover" />
+                  <Image
+                    src={imagePreview}
+                    alt="Avatar"
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-stone-300">
                     <UserRound className="w-12 h-12" />
                   </div>
                 )}
               </div>
-              
+
               {/* Overlay เมื่อ hover */}
               <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <span className="text-white text-xs font-bold border border-white px-3 py-1 rounded-full pointer-events-none">
@@ -133,24 +138,29 @@ export default function ProfilePage() {
                 </span>
               </div>
             </div>
-            
-            {/* ✅ Input File ซ่อนไว้ และใช้ ref อ้างถึง */}
-            <input 
+
+            {/*  Input File ซ่อนไว้ และใช้ ref อ้างถึง */}
+            <input
               ref={fileInputRef}
-              type="file" 
-              accept="image/*" 
-              onChange={handleImageChange} 
-              className="hidden" 
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="hidden"
             />
 
-            <p className="text-xs text-stone-400 mt-2 cursor-pointer hover:text-stone-600" onClick={handleAvatarClick}>
+            <p
+              className="text-xs text-stone-400 mt-2 cursor-pointer hover:text-stone-600"
+              onClick={handleAvatarClick}
+            >
               คลิกที่รูปเพื่อเปลี่ยน
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-stone-700 mb-1">ชื่อที่ใช้แสดง</label>
+              <label className="block text-sm font-bold text-stone-700 mb-1">
+                ชื่อที่ใช้แสดง
+              </label>
               <input
                 type="text"
                 value={name}
@@ -161,7 +171,9 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-stone-700 mb-1">อีเมล (เปลี่ยนไม่ได้)</label>
+              <label className="block text-sm font-bold text-stone-700 mb-1">
+                อีเมล (เปลี่ยนไม่ได้)
+              </label>
               <input
                 type="text"
                 value={email}
@@ -197,7 +209,6 @@ export default function ProfilePage() {
               ออกจากระบบ
             </button>
           </div>
-
         </form>
       </div>
     </div>

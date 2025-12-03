@@ -20,8 +20,7 @@ module.exports = {
         },
       },
       fontFamily: {
-        // อย่าลืมว่าต้องตั้งค่าฟอนต์ใน layout.tsx ให้ตัวแปรตรงกันด้วย
-        mali: ["var(--font-mali)", "cursive"], 
+        mali: ["var(--font-mali)", "cursive"],
       },
     },
   },

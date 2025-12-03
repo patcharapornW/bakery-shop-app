@@ -1,3 +1,8 @@
+/**
+ * หน้าเมนูสินค้าทั้งหมด
+ * แสดงสินค้า, กรองตามหมวดหมู่, และค้นหา
+ */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -31,26 +36,25 @@ const CATEGORIES: { id: string; label: string; icon: LucideIcon }[] = [
 
 export default function MenuPage() {
   const { showAlert } = useAlert();
+  const { user } = useSupabaseAuth();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [openCustom, setOpenCustom] = useState(false);
   const [selected, setSelected] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { user } = useSupabaseAuth();
   const [isAdding, setIsAdding] = useState(false);
-
-  // ✅ 2. เพิ่ม State สำหรับเก็บหมวดหมู่ที่เลือก (ค่าเริ่มต้นคือ 'all')
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // อ่านคำค้นหาจาก URL
   useEffect(() => {
-    // Get search query from URL
     const search = searchParams.get("search");
     if (search) {
       queueMicrotask(() => setSearchQuery(search));
     }
   }, [searchParams]);
 
+  // ดึงข้อมูลสินค้าทั้งหมด
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -72,14 +76,14 @@ export default function MenuPage() {
     };
   }, []);
 
-  // ✅ 3. ฟังก์ชันกรองสินค้า (รวมการค้นหา)
+  // กรองสินค้าตามหมวดหมู่และคำค้นหา
   const filteredProducts = products.filter((product) => {
-    // Filter by category
+    // กรองสินค้าตามหมวดหมู่
     if (selectedCategory !== "all" && product.category !== selectedCategory) {
       return false;
     }
-    
-    // Filter by search query
+
+    // กรองสินค้าตามคำค้นหา
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       return (
@@ -88,7 +92,7 @@ export default function MenuPage() {
         product.category?.toLowerCase().includes(query)
       );
     }
-    
+
     return true;
   });
 
@@ -122,14 +126,14 @@ export default function MenuPage() {
         "เพิ่มสินค้าไม่สำเร็จ",
         "เกิดข้อผิดพลาดในการเพิ่มสินค้าลงตะกร้า",
         "error"
-      ); 
+      );
     } else {
       setOpenCustom(false);
       showAlert(
         "เพิ่มสินค้าสำเร็จ",
         "เพิ่มสินค้าลงในตะกร้าเรียบร้อยแล้ว",
         "success"
-      ); 
+      );
     }
   };
 
@@ -157,9 +161,15 @@ export default function MenuPage() {
         </h1>
         {searchQuery ? (
           <p className="text-stone-600 text-lg">
-            ผลการค้นหา: <span className="font-bold text-stone-900">&ldquo;{searchQuery}&rdquo;</span>
+            ผลการค้นหา:{" "}
+            <span className="font-bold text-stone-900">
+              &ldquo;{searchQuery}&rdquo;
+            </span>
             {filteredProducts.length > 0 && (
-              <span className="text-stone-500"> ({filteredProducts.length} รายการ)</span>
+              <span className="text-stone-500">
+                {" "}
+                ({filteredProducts.length} รายการ)
+              </span>
             )}
           </p>
         ) : (
@@ -169,7 +179,7 @@ export default function MenuPage() {
         )}
       </div>
 
-      {/* ✅ 4. แถบเลือกหมวดหมู่ (Scroll แนวนอนได้ในมือถือ) */}
+      {/* หมวดหมู่ */}
       <div className="flex flex-wrap justify-center gap-3 mb-10 overflow-x-auto pb-2 px-2 scrollbar-hide">
         {CATEGORIES.map((cat) => (
           <button
@@ -192,7 +202,7 @@ export default function MenuPage() {
         ))}
       </div>
 
-      {/* ✅ 5. แสดงสินค้า (ใช้ filteredProducts แทน products เดิม) */}
+      {/* สินค้า */}
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {filteredProducts.map((p) => (
@@ -200,7 +210,6 @@ export default function MenuPage() {
           ))}
         </div>
       ) : (
-        // ถ้าไม่มีสินค้าในหมวดนี้
         <div className="text-center py-20">
           <p className="text-xl text-stone-400">ไม่มีสินค้าในหมวดหมู่นี้</p>
           <button

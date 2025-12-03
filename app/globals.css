@@ -7,16 +7,21 @@
     @apply scroll-smooth;
   }
   body {
-    /* ใช้สีธีมใหม่เป็นค่าเริ่มต้น */
-    @apply bg-amber-50 text-stone-800 font-mali;
+    @apply bg-[#fbf4eb] text-stone-800 font-mali;
   }
 }
 
 /*ตะกร้าเด้ง*/
 @keyframes pop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .cart-pop-animation {

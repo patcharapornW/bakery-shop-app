@@ -27,7 +27,7 @@ export default function AdminPage() {
   // --- State ---
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState<string>(""); // keep as string for controlled input
+  const [price, setPrice] = useState<string>("");
   const [category, setCategory] = useState("cake");
   const [isCustom, setIsCustom] = useState(false);
   const [image, setImage] = useState<File | null>(null);
@@ -39,7 +39,7 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingRole, setCheckingRole] = useState(true);
 
-  // --- Helpers for storage upload/delete ---
+  // ตัวช่วยอัปโหลดรูปภาพและลบรูปภาพ
   type UploadResult = { publicUrl: string; path: string };
 
   const uploadImage = async (file: File): Promise<UploadResult> => {
@@ -51,7 +51,7 @@ export default function AdminPage() {
 
     const { data, error } = await supabase.storage
       .from("product-images")
-      .upload(filePath, file, { upsert: false }); // don't overwrite
+      .upload(filePath, file, { upsert: false });
 
     if (error) throw error;
 
@@ -66,12 +66,12 @@ export default function AdminPage() {
     try {
       let path = imageOrPath;
 
-      // If looks like a URL, try to extract path after '/product-images/'
+      // ถ้ารูปภาพมี URL ลองดึง path หลังจาก '/product-images/'
       if (imageOrPath.startsWith("http")) {
         const marker = "/product-images/";
         const idx = imageOrPath.indexOf(marker);
         if (idx === -1) {
-          // fallback: try to extract the last two segments
+          // ถ้าไม่พบ ลองดึงสองส่วนสุดท้าย
           const parts = imageOrPath.split("/").filter(Boolean);
           path = parts.slice(-2).join("/");
         } else {
@@ -79,10 +79,10 @@ export default function AdminPage() {
         }
       }
 
-      // remove expects an array of paths
+      // ลบรูปภาพจาก storage
       await supabase.storage.from("product-images").remove([path]);
     } catch (err) {
-      // Log but don't throw — deletion failure shouldn't block other flows
+      // ลบรูปภาพไม่สำเร็จ ไม่ต้องยกเลิกการทำงานอื่น
       console.error("deleteImage error:", err);
     }
   };
@@ -169,7 +169,7 @@ export default function AdminPage() {
     };
   }, [user, router, isLoading, showAlert]);
 
-  // --- fetchProducts with mounted guard ---
+  // ดึงข้อมูลสินค้า
   async function fetchProducts() {
     setLoadingProducts(true);
     let isMounted = true;
@@ -191,7 +191,7 @@ export default function AdminPage() {
       if (isMounted) setLoadingProducts(false);
     }
 
-    // cleanup function to prevent state updates if unmounted quickly
+    // ฟังก์ชันล้างข้อมูลเพื่อป้องกันการอัปเดต state ถ้า unmounted รวดเร็ว
     return () => {
       isMounted = false;
     };
@@ -209,7 +209,7 @@ export default function AdminPage() {
     try {
       let imageUrl = editingProduct?.image_url || null;
 
-      // If user selected a new image, upload it
+      // ถ้าผู้ใช้เลือกรูปภาพใหม่ อัปโหลดรูปภาพ
       if (image) {
         const uploadResult = await uploadImage(image);
         uploadedNewImagePath = uploadResult.path;
@@ -217,7 +217,7 @@ export default function AdminPage() {
         imageUrl = uploadedNewPublicUrl;
       }
 
-      // Prepare product data
+      // กำหนดข้อมูลสินค้า
       const productData: ProductInsert = {
         name,
         price: Number(price),
@@ -250,7 +250,7 @@ export default function AdminPage() {
           "เพิ่มสินค้าสำเร็จ",
           `เพิ่มสินค้า ${name} เข้าสู่เมนูเรียบร้อยแล้ว`,
           "success"
-        ); // ✅ แทนที่ alert
+        );
       }
 
       resetForm();
@@ -259,7 +259,7 @@ export default function AdminPage() {
       console.error(err);
       showAlert("เกิดข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลสินค้าได้", "error");
 
-      // If we uploaded a new image but DB update failed, remove uploaded image to avoid orphan
+      // ถ้าอัปโหลดรูปภาพใหม่แต่การอัปเดตฐานข้อมูลล้มเหลว ลบรูปภาพเพื่อป้องกันการขาดการเชื่อมโยง
       if (uploadedNewImagePath) {
         try {
           await deleteImage(uploadedNewImagePath);
@@ -300,7 +300,11 @@ export default function AdminPage() {
 
       if (product.image_url) await deleteImage(product.image_url);
 
-      showAlert("ลบสำเร็จ", `สินค้า "${product.name}" ถูกลบออกจากระบบแล้ว`, "success");
+      showAlert(
+        "ลบสำเร็จ",
+        `สินค้า "${product.name}" ถูกลบออกจากระบบแล้ว`,
+        "success"
+      );
       setProducts((prev) => prev.filter((p) => p.id !== product.id));
       if (editingProduct?.id === product.id) resetForm();
     } catch (err) {
@@ -325,7 +329,7 @@ export default function AdminPage() {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-[#FBF9F6] py-10">
+    <div className="min-h-screen bg-[#fbf4eb] py-10">
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* --- ส่วนที่ 1: ฟอร์มจัดการสินค้า --- */}
         <div className="lg:col-span-1">
@@ -383,7 +387,7 @@ export default function AdminPage() {
                     pattern="[0-9]*"
                     value={price}
                     onChange={(e) => {
-                      // allow only numbers and empty
+                      // อนุญาตเฉพาะตัวเลขและว่าง
                       const val = e.target.value;
                       if (val === "" || /^[0-9]*$/.test(val)) setPrice(val);
                     }}
@@ -392,7 +396,7 @@ export default function AdminPage() {
                     min="0"
                   />
                 </div>
-                {/* ✅ เพิ่ม Dropdown หมวดหมู่ */}
+
                 <div>
                   <label className="block text-sm font-bold text-stone-700 mb-1">
                     หมวดหมู่
@@ -430,7 +434,7 @@ export default function AdminPage() {
                   />
                 </label>
 
-                {/* show existing image preview when editing and no new image selected */}
+                {/* แสดงรูปภาพปัจจุบันเมื่อแก้ไขและไม่เลือกรูปภาพใหม่ */}
                 {editingProduct?.image_url && !image && (
                   <div className="mt-3 text-sm text-stone-500">
                     รูปปัจจุบัน: {editingProduct.image_url.split("/").pop()}

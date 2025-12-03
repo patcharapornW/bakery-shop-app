@@ -50,7 +50,7 @@ export default function SignupPage() {
         const { data: publicUrlData } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
-        
+
         avatarUrl = publicUrlData.publicUrl;
       }
 
@@ -91,20 +91,27 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FBF9F6] p-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border border-stone-100">
-        
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-stone-800 mb-2">สร้างบัญชีใหม่</h1>
-          <p className="text-stone-500">ร่วมเป็นส่วนหนึ่งของครอบครัว Baan Kanom</p>
+          <h1 className="text-3xl font-bold text-stone-800 mb-2">
+            สร้างบัญชีใหม่
+          </h1>
+          <p className="text-stone-500">
+            ร่วมเป็นส่วนหนึ่งของครอบครัว Baan Kanom
+          </p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
-          
           {/* ส่วนอัปโหลดรูปโปรไฟล์ */}
           <div className="flex flex-col items-center mb-4">
             <label className="relative cursor-pointer group">
               <div className="w-24 h-24 rounded-full overflow-hidden bg-stone-100 border-2 border-stone-200 flex items-center justify-center">
                 {imagePreview ? (
-                  <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                  <Image
+                    src={imagePreview}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                  />
                 ) : (
                   <Camera className="w-8 h-8 text-stone-400" />
                 )}
@@ -112,13 +119,22 @@ export default function SignupPage() {
               <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-bold">
                 เปลี่ยนรูป
               </div>
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
             </label>
-            <span className="text-xs text-stone-500 mt-2">รูปโปรไฟล์ (ถ้ามี)</span>
+            <span className="text-xs text-stone-500 mt-2">
+              รูปโปรไฟล์ (ถ้ามี)
+            </span>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-stone-700 mb-1">ชื่อที่ใช้แสดง</label>
+            <label className="block text-sm font-bold text-stone-700 mb-1">
+              ชื่อที่ใช้แสดง
+            </label>
             <input
               type="text"
               placeholder="ชื่อเล่น หรือ ชื่อจริง"
@@ -130,7 +146,9 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-stone-700 mb-1">อีเมล</label>
+            <label className="block text-sm font-bold text-stone-700 mb-1">
+              อีเมล
+            </label>
             <input
               type="email"
               placeholder="name@example.com"
@@ -142,7 +160,9 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-stone-700 mb-1">รหัสผ่าน</label>
+            <label className="block text-sm font-bold text-stone-700 mb-1">
+              รหัสผ่าน
+            </label>
             <input
               type="password"
               placeholder="••••••••"
@@ -164,11 +184,13 @@ export default function SignupPage() {
 
         <div className="text-center mt-6 text-sm text-stone-500">
           มีบัญชีอยู่แล้ว?{" "}
-          <Link href="/login" className="text-stone-800 font-bold hover:underline">
+          <Link
+            href="/login"
+            className="text-stone-800 font-bold hover:underline"
+          >
             เข้าสู่ระบบที่นี่
           </Link>
         </div>
-
       </div>
     </div>
   );

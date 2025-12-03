@@ -1,3 +1,8 @@
+/**
+ * ProductCard Component
+ * แสดงการ์ดสินค้า, ปุ่มเพิ่มลงตะกร้าหรือปรับแต่งเค้ก
+ */
+
 "use client";
 
 import React, { useState } from "react";
@@ -9,19 +14,26 @@ import { useAlert } from "./AlertProvider";
 import { motion } from "framer-motion";
 import { Palette, ShoppingCart } from "lucide-react";
 
+// ========== Types ==========
+
 interface ProductCardProps {
   product: Product;
   onOpenCustom?: (product: Product) => void;
 }
 
+// ========== Main Component ==========
+
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onOpenCustom,
 }) => {
+  // ========== Hooks & State Management ==========
+
   const { user } = useSupabaseAuth();
   const { showAlert } = useAlert();
   const [isAdding, setIsAdding] = useState(false);
 
+  // เพิ่มสินค้าลงตะกร้า (อัปเดตจำนวนถ้ามีอยู่แล้ว)
   const addToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user)
@@ -61,18 +73,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           },
         ]);
       }
-      showAlert("เพิ่มสำเร็จ", `เพิ่ม ${product.name} ลงในตะกร้าแล้ว`, "success");
+      showAlert(
+        "เพิ่มสำเร็จ",
+        `เพิ่ม ${product.name} ลงในตะกร้าแล้ว`,
+        "success"
+      );
     } catch (err) {
       console.error(err);
-      showAlert(
-        "เกิดข้อผิดพลาด",
-        "ไม่สามารถเพิ่มสินค้าลงตะกร้าได้",
-        "error"
-      );
+      showAlert("เกิดข้อผิดพลาด", "ไม่สามารถเพิ่มสินค้าลงตะกร้าได้", "error");
     }
     setIsAdding(false);
   };
 
+  // จัดการการคลิกปุ่ม (เปิด Modal ถ้าเป็น custom, เพิ่มตะกร้าถ้าเป็นปกติ)
   const handleAction = (e: React.MouseEvent) => {
     if (product.is_custom && onOpenCustom) {
       onOpenCustom(product);

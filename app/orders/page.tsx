@@ -1,3 +1,8 @@
+/**
+ * หน้าแสดงประวัติการสั่งซื้อ
+ * แสดงรายการคำสั่งซื้อ, สถานะ, รายละเอียดสินค้า, และสลิปการชำระเงิน
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,6 +23,8 @@ import {
   XCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+// ========== Types ==========
 
 type OrderItem = {
   id: string;
@@ -51,6 +58,9 @@ type StatusMeta = {
   description: string;
 };
 
+// ========== Constants ==========
+
+// กำหนดค่าสำหรับแต่ละสถานะคำสั่งซื้อ (สี, ไอคอน, คำอธิบาย)
 const STATUS_BADGES: Record<string, StatusMeta> = {
   pending: {
     label: "กำลังตรวจสอบ",
@@ -89,17 +99,23 @@ const STATUS_BADGES: Record<string, StatusMeta> = {
   },
 };
 
+/**
+ * การตั้งค่าการเคลื่อนไหวสำหรับหน้า Orders Page
+ */
 const pageMotion = {
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5, ease: "easeOut" as const },
 };
 
+// หน้าประวัติการสั่งซื้อ
+
 export default function OrdersPage() {
   const { user } = useSupabaseAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ดึงข้อมูลคำสั่งซื้อทั้งหมดของผู้ใช้
   useEffect(() => {
     if (!user) return;
     let active = true;
@@ -129,6 +145,7 @@ export default function OrdersPage() {
     };
   }, [user]);
 
+  // แสดงผลตามสถานะ
   const renderState = () => {
     if (!user) {
       return (
@@ -222,6 +239,7 @@ export default function OrdersPage() {
               </div>
 
               <div className="grid gap-6 md:grid-cols-[1.3fr,1fr]">
+                {/* รายการสินค้าและสรุปราคา */}
                 <div className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -256,9 +274,7 @@ export default function OrdersPage() {
                                 {Object.entries(item.custom_options).map(
                                   ([key, value]) => (
                                     <div key={key} className="flex gap-1">
-                                      <span className="capitalize">
-                                        {key}:
-                                      </span>
+                                      <span className="capitalize">{key}:</span>
                                       <span className="text-stone-600">
                                         {value as string}
                                       </span>
@@ -276,6 +292,7 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
+                  {/* สรุปค่าใช้จ่าย */}
                   <div className="rounded-2xl bg-stone-50 p-4 border border-stone-100 space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-9 h-9 rounded-2xl bg-white flex items-center justify-center text-stone-700">
@@ -317,7 +334,9 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
+                {/* ข้อมูลจัดส่งและสลิป */}
                 <div className="space-y-5">
+                  {/* ข้อมูลการจัดส่ง */}
                   <div className="rounded-2xl border border-stone-100 p-5 bg-gradient-to-br from-white to-stone-50/70 shadow-inner">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-9 h-9 rounded-2xl bg-stone-900/5 flex items-center justify-center text-stone-800">
@@ -348,6 +367,7 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
+                  {/* สลิปการชำระเงิน */}
                   <div className="rounded-2xl border border-stone-100 p-5 shadow-sm space-y-3">
                     <div className="flex items-center gap-2">
                       <div className="w-9 h-9 rounded-2xl bg-stone-900/5 flex items-center justify-center text-stone-800">
@@ -400,7 +420,7 @@ export default function OrdersPage() {
 
   return (
     <motion.section
-      className="min-h-screen bg-[#FBF9F6] py-10 px-4"
+      className="min-h-screen bg-[#fbf4eb] py-10 px-4"
       initial="initial"
       animate="animate"
       variants={pageMotion}
@@ -412,15 +432,11 @@ export default function OrdersPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <p className="text-sm uppercase tracking-[0.4em] text-stone-400">
-            Order Center
-          </p>
           <h1 className="text-4xl font-bold text-stone-900">
             ประวัติการสั่งซื้อของฉัน
           </h1>
           <p className="text-stone-500 max-w-2xl mx-auto">
-            ตรวจสอบสถานะคำสั่งซื้อ รายการสินค้า และข้อมูลการจัดส่งได้ในที่เดียว
-            ดีไซน์อ้างอิงองค์ประกอบการ์ดของ shadcn/ui เพื่อให้สอดคล้องมาตรฐานการออกแบบสมัยใหม่
+            ตรวจสอบสถานะคำสั่งซื้อ รายการสินค้า
           </p>
         </motion.div>
         {renderState()}
@@ -428,4 +444,3 @@ export default function OrdersPage() {
     </motion.section>
   );
 }
-

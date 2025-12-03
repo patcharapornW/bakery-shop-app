@@ -35,7 +35,7 @@ function ResetPasswordPageInner() {
   const hasUrlRecovery = searchParams.get("type") === "recovery";
   const [hashRecoveryAccess, setHashRecoveryAccess] = useState(false);
   const [authRecoveryTriggered, setAuthRecoveryTriggered] = useState(false);
-
+  // ตรวจสอบลิงก์ตั้งรหัสผ่าน
   useEffect(() => {
     if (typeof window === "undefined") return;
     const url = new URL(window.location.href);
@@ -60,7 +60,8 @@ function ResetPasswordPageInner() {
     };
   }, []);
 
-  const canRenderForm = hasUrlRecovery || hashRecoveryAccess || authRecoveryTriggered;
+  const canRenderForm =
+    hasUrlRecovery || hashRecoveryAccess || authRecoveryTriggered;
 
   const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -156,7 +157,8 @@ function ResetPasswordPageInner() {
         ) : (
           <div className="text-center text-sm text-stone-500 space-y-4">
             <p>
-              ลิงก์ตั้งรหัสผ่านไม่ถูกต้อง หรือหมดอายุแล้ว กรุณาขอรหัสใหม่อีกครั้ง
+              ลิงก์ตั้งรหัสผ่านไม่ถูกต้อง หรือหมดอายุแล้ว
+              กรุณาขอรหัสใหม่อีกครั้ง
             </p>
             <Link
               href="/forgot-password"
@@ -179,4 +181,3 @@ function ResetPasswordPageInner() {
     </div>
   );
 }
-

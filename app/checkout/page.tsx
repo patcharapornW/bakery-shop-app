@@ -1,3 +1,8 @@
+/**
+ * หน้าสั่งซื้อสินค้า
+ * กรอกข้อมูลจัดส่ง, อัปโหลดสลิป, ใช้โค้ดส่วนลด, และสร้างคำสั่งซื้อ
+ */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,7 +13,8 @@ import { useAlert } from "@/components/AlertProvider";
 import { motion } from "framer-motion";
 import { CreditCard, MapPin, Navigation, ShoppingBag } from "lucide-react";
 
-// Define Types
+// ========== Types ==========
+
 interface CartItem {
   id: string;
   user_id: string;
@@ -24,32 +30,32 @@ interface CartItem {
   } | null;
 }
 
+// ========== Constants ==========
+
 const BANK_INFO = {
   bankName: "ธนาคารกสิกรไทย (KBANK)",
   accountName: "ร้านบ้านขนม (Baan Kanom)",
   accountNumber: "123-4-56789-0",
 };
 
+// ========== Main Component ==========
+
 export default function CheckoutPage() {
   const { user } = useSupabaseAuth();
   const router = useRouter();
+  const { showAlert } = useAlert();
 
+  // State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [subTotal, setSubTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-
-  // Form State
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [slip, setSlip] = useState<File | null>(null);
-
-  // ✅ [New] State สำหรับระยะทางและค่าส่ง
-  const [distance, setDistance] = useState<number | "">(""); // ระยะทาง (กม.)
-
-  // Coupon State
+  const [distance, setDistance] = useState<number | "">("");
   const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [appliedCode, setAppliedCode] = useState("");
@@ -58,8 +64,7 @@ export default function CheckoutPage() {
     type: "success" | "error";
   } | null>(null);
 
-  const { showAlert } = useAlert();
-
+  // ดึงข้อมูลสินค้าในตะกร้า
   useEffect(() => {
     if (!user) return;
     async function fetchCart() {
@@ -81,7 +86,7 @@ export default function CheckoutPage() {
     fetchCart();
   }, [user]);
 
-  // ✅ สูตรคำนวณค่าส่ง (แก้ไขเรทราคาได้ที่นี่)
+  // คำนวณค่าจัดส่ง: 30 บาท + (ระยะทาง x 5 บาท) หรือฟรีถ้าใช้โค้ด FREEDEL
   const calculateShipping = (km: number) => {
     if (km <= 0) return 0;
     if (appliedCode === "FREEDEL" && subTotal >= 500) return 0; // ถ้าใช้โค้ดส่งฟรี และยอดถึง
@@ -93,13 +98,10 @@ export default function CheckoutPage() {
     return basePrice + km * perKm;
   };
 
-  // ค่าส่งปัจจุบัน
   const shippingCost = calculateShipping(Number(distance));
-
-  // ✅ คำนวณยอดสุทธิ (สินค้า - ส่วนลด + ค่าส่ง)
   const finalPrice = Math.max(0, subTotal - discount + shippingCost);
 
-  // Logic คูปอง
+  // ตรวจสอบเงื่อนไขโค้ดส่วนลด (ยกเลิกอัตโนมัติถ้ายอดไม่ถึง)
   useEffect(() => {
     // เช็คเงื่อนไขคูปองเมื่อยอดเปลี่ยน
     if (appliedCode === "FREEDEL" && subTotal < 500) {
@@ -117,6 +119,7 @@ export default function CheckoutPage() {
     }
   }, [subTotal, appliedCode]);
 
+  // ใช้โค้ดส่วนลด (HBD10: ลด 10%, FREEDEL: ส่งฟรี, WELCOME50: ลด 50 บาท)
   const handleApplyCoupon = () => {
     const code = couponCode.trim().toUpperCase();
     if (!code) {
@@ -171,6 +174,7 @@ export default function CheckoutPage() {
     setCouponMessage(null);
   };
 
+  // อัปโหลดสลิปไปยัง Supabase Storage และคืนค่า URL
   const uploadSlip = async (file: File) => {
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random()
@@ -188,12 +192,23 @@ export default function CheckoutPage() {
     return publicUrlData.publicUrl;
   };
 
+  // ส่งคำสั่งซื้อ: อัปโหลดสลิป, สร้าง order, เพิ่ม order_items, ลบตะกร้า
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid) return;
 
-    if (cartItems.length === 0) return showAlert("ตะกร้าว่างเปล่า", "กรุณาเลือกสินค้าก่อนสั่งซื้อครับ", "error");
-    if (!slip) return showAlert("ยังไม่ได้แนบสลิป", "กรุณาโอนเงินและแนบสลิปก่อนนะครับ", "error");
+    if (cartItems.length === 0)
+      return showAlert(
+        "ตะกร้าว่างเปล่า",
+        "กรุณาเลือกสินค้าก่อนสั่งซื้อครับ",
+        "error"
+      );
+    if (!slip)
+      return showAlert(
+        "ยังไม่ได้แนบสลิป",
+        "กรุณาโอนเงินและแนบสลิปก่อนนะครับ",
+        "error"
+      );
 
     setSubmitting(true);
     try {
@@ -250,16 +265,16 @@ export default function CheckoutPage() {
     }
   };
 
-  // ✅ Validation: เพิ่มการเช็คระยะทาง และเงื่อนไขคูปอง
+  // ตรวจสอบความถูกต้องของฟอร์ม
   const isFormValid =
     name.trim() !== "" &&
     phone.trim() !== "" &&
     address.trim() !== "" &&
     distance !== "" &&
-    Number(distance) > 0 && // ต้องกรอกระยะทาง
+    Number(distance) > 0 &&
     slip !== null &&
     cartItems.length > 0 &&
-    couponMessage?.type !== "error"; // ต้องไม่มี Error เรื่องคูปอง
+    couponMessage?.type !== "error";
 
   if (loading)
     return <div className="p-10 text-center text-stone-500">กำลังโหลด...</div>;
@@ -268,15 +283,16 @@ export default function CheckoutPage() {
       <div className="p-10 text-center text-stone-500">ไม่มีสินค้าในตะกร้า</div>
     );
 
+  // ========== Main Render ==========
+
   return (
     <motion.div
-      className="min-h-screen bg-[#FBF9F6] py-10 px-4"
+      className="min-h-screen bg-[#fbf4eb] py-10 px-4"
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* --- ฝั่งซ้าย --- */}
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-stone-100">
             <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
@@ -328,7 +344,7 @@ export default function CheckoutPage() {
                 />
               </div>
 
-              {/* ✅ ช่องกรอกระยะทาง */}
+              {/* กรอกระยะทางสำหรับคำนวณค่าจัดส่ง */}
               <div className="p-4 bg-stone-50 rounded-xl border border-stone-200">
                 <label className="block text-sm font-bold text-stone-700 mb-1">
                   ระยะทางจากร้าน (กม.)
@@ -381,6 +397,7 @@ export default function CheckoutPage() {
             </form>
           </div>
 
+          {/* ข้อมูลการชำระเงิน */}
           <div className="bg-white p-6 rounded-2xl shadow-lg border border-stone-100">
             <h2 className="text-2xl font-bold text-stone-900 mb-4 flex items-center gap-2">
               <CreditCard className="w-5 h-5 text-stone-500" />
@@ -411,7 +428,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* --- ฝั่งขวา: สรุป --- */}
+        {/*  สรุปคำสั่งซื้อ */}
         <div className="bg-white p-6 rounded-2xl shadow-lg/30 border border-stone-100 h-fit sticky top-24">
           <h2 className="text-xl font-bold text-stone-900 mb-4 flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-stone-500" />
@@ -455,7 +472,7 @@ export default function CheckoutPage() {
             ))}
           </div>
 
-          {/* ✅ ส่วนกรอกโค้ดส่วนลด */}
+          {/* โค้ดส่วนลด */}
           <div className="mb-6">
             <label className="text-sm font-bold text-stone-700 block mb-2">
               โค้ดส่วนลด
@@ -502,12 +519,14 @@ export default function CheckoutPage() {
             )}
           </div>
 
+          {/* สรุปราคา */}
           <div className="border-t-2 border-stone-100 pt-4 space-y-2">
             <div className="flex justify-between text-stone-600">
               <span>ยอดรวมสินค้า</span>
               <span>฿{subTotal.toFixed(2)}</span>
             </div>
 
+            {/* แสดงส่วนลดถ้ามี */}
             {discount > 0 && (
               <div className="flex justify-between text-green-600 font-medium">
                 <span>ส่วนลด ({appliedCode})</span>
@@ -515,7 +534,7 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {/* ✅ แสดงค่าส่ง */}
+            {/* แสดงค่าจัดส่ง */}
             <div className="flex justify-between text-stone-600">
               <span>ค่าจัดส่ง ({distance ? `${distance} กม.` : "กม."})</span>
               <span>
@@ -535,7 +554,6 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* ✅ ปุ่มสั่งซื้อ (Disabled State) */}
           <button
             type="submit"
             form="checkout-form"

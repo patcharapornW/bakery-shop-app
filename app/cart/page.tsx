@@ -1,12 +1,18 @@
+/**
+ * หน้าตะกร้าสินค้า
+ * แสดงรายการสินค้า, ปรับจำนวน, ลบสินค้า, และสรุปยอดรวม
+ */
+
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useSupabaseAuth } from "@/components/useSupabaseAuth";
 import { useRouter } from "next/navigation";
-// import type { Product } from "@/types"; // ไม่ได้ใช้ที่นี่
+import { useAlert } from "@/components/AlertProvider";
 
-// (Type CartItem: เหมือนเดิม)
+// ========== Types ==========
+
 type CartItem = {
   id: string;
   user_id: string;
@@ -17,12 +23,13 @@ type CartItem = {
   created_at: string;
 };
 
-// (Helper function: optionKeyMap, formatCustomOptions... เหมือนเดิม)
 const optionKeyMap: Record<string, string> = {
   flavor: "รสชาติ",
   frosting: "ครีม",
   note: "ข้อความ",
 };
+
+// แสดง custom_options เป็นรายการ bullet points
 const formatCustomOptions = (options: unknown | null) => {
   if (!options || typeof options !== "object" || Array.isArray(options)) {
     return null;
@@ -34,7 +41,6 @@ const formatCustomOptions = (options: unknown | null) => {
   return (
     <ul className="text-sm mt-2 text-stone-600 list-disc list-inside space-y-1">
       {" "}
-      {/* ✅ เพิ่ม space-y-1 */}
       {entries.map(([key, value]) => {
         if (key === "note" && !value) return null;
         return (
@@ -48,12 +54,16 @@ const formatCustomOptions = (options: unknown | null) => {
   );
 };
 
+// ========== Main Component ==========
+
 export default function CartPage() {
   const { user } = useSupabaseAuth();
+  const { showAlert } = useAlert();
+  const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
+  // ดึงข้อมูลสินค้าในตะกร้า
   useEffect(() => {
     let mounted = true;
     async function load() {
@@ -78,16 +88,30 @@ export default function CartPage() {
     };
   }, [user]);
 
+  // เปลี่ยนจำนวนสินค้า (ถ้าเป็น 0 จะลบออกพร้อมยืนยัน)
   const changeQty = async (id: string, qty: number) => {
     // ป้องกันไม่ให้ quantity ติดลบ หรือเกิน 99
-    if (qty < 0) qty = 0; // หรือจะให้ลบออกจากตะกร้าไปเลยก็ได้
-    if (qty > 99) qty = 99; // จำกัดจำนวนสูงสุด
+    if (qty < 0) qty = 0;
+    if (qty > 99) qty = 99;
 
     if (qty === 0) {
-      // ถ้าระบุ 0 ให้ลบออกจากตะกร้า
-      if (!confirm("คุณต้องการลบสินค้านี้ออกจากตะกร้าใช่หรือไม่?")) return; // ✅ เพิ่ม confirm
-      setItems((prevItems) => prevItems.filter((item) => item.id !== id));
-      await supabase.from("cart_items").delete().eq("id", id);
+      // ถ้าระบุ 0 ให้ลบออกจากตะกร้า (พร้อมยืนยัน)
+      const itemToDelete = items.find((item) => item.id === id);
+      const itemName = itemToDelete?.product_name || "สินค้านี้";
+
+      showAlert(
+        "ยืนยันการลบสินค้า",
+        `คุณต้องการลบ "${itemName}" ออกจากตะกร้าหรือไม่?`,
+        {
+          type: "error",
+          okText: "ลบสินค้า",
+          cancelText: "ยกเลิก",
+          onOk: async () => {
+            setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+            await supabase.from("cart_items").delete().eq("id", id);
+          },
+        }
+      );
     } else {
       setItems((prevItems) =>
         prevItems.map((item) =>
@@ -98,14 +122,13 @@ export default function CartPage() {
     }
   };
 
+  // คำนวณยอดรวมทั้งหมด
   const totalPrice = useMemo(() => {
     return items.reduce(
       (s, it) => s + Number(it.price) * (it.quantity ?? 0),
       0
     );
   }, [items]);
-
-  // --- (Render) JSX ที่ปรับปรุง UI แล้ว ---
 
   if (loading) {
     return (
@@ -119,7 +142,7 @@ export default function CartPage() {
           กรุณาเข้าสู่ระบบเพื่อดูตะกร้าสินค้า
         </h2>
         <button
-          onClick={() => router.push("/login")} // ✅ redirect ไปหน้า login
+          onClick={() => router.push("/login")}
           className="px-6 py-2 bg-stone-700 text-white rounded-md shadow-sm hover:bg-stone-800 transition-colors font-medium"
         >
           เข้าสู่ระบบ
@@ -130,7 +153,7 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="max-w-3xl mx-auto mt-4 p-8 text-center bg-white shadow-md rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 text-stone-700 text-stone-700">
+        <h2 className="text-2xl font-semibold mb-4 text-stone-700">
           ตะกร้าของคุณว่างเปล่า
         </h2>
         <button
@@ -144,28 +167,18 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FBF9F6] py-10 px-4">
-      {" "}
-      {/* ✅ เพิ่มสีพื้นหลัง */}
+    <div className="min-h-screen bg-[#fbf4eb] py-10 px-4">
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        {" "}
-        {/* ✅ เปลี่ยน Layout เป็น Grid */}
-        {/* --- ฝั่งซ้าย: รายการสินค้าในตะกร้า --- */}
         <div className="md:col-span-2 space-y-4">
           <h1 className="text-3xl font-bold text-stone-800 mb-4">
             ตะกร้าสินค้า
-          </h1>{" "}
-          {/* ✅ ปรับตำแหน่งหัวข้อ */}
+          </h1>
           {items.map((it) => (
             <div
               key={it.id}
               className="bg-white shadow-md rounded-2xl p-5 flex items-center justify-between border border-stone-100"
             >
-              {" "}
-              {/* ✅ ปรับแต่ง Card สินค้า */}
               <div className="flex-1 pr-4">
-                {" "}
-                {/* ✅ เพิ่ม pr-4 */}
                 <h3 className="font-bold text-lg text-stone-800 mb-1">
                   {it.product_name}
                 </h3>
@@ -176,7 +189,6 @@ export default function CartPage() {
               </div>
               <div className="flex flex-col items-end gap-3">
                 {" "}
-                {/* ✅ ปรับ gap */}
                 <p className="font-semibold text-xl text-stone-700">
                   ฿{(Number(it.price) * it.quantity).toFixed(2)}
                 </p>
@@ -201,11 +213,10 @@ export default function CartPage() {
             </div>
           ))}
         </div>
-        {/* --- ฝั่งขวา: สรุปยอด --- */}
+
+        {/*  สรุปยอด */}
         <div className="md:col-span-1">
           <div className="bg-white shadow-md rounded-2xl p-5 sticky top-24 border border-stone-100">
-            {" "}
-            {/* ✅ ปรับแต่ง Card สรุปยอด */}
             <h2 className="text-xl font-bold text-stone-800 mb-4">สรุปยอด</h2>
             <div className="flex justify-between mb-2 text-stone-700">
               <span>ยอดรวม</span>
@@ -215,7 +226,7 @@ export default function CartPage() {
               <span>ค่าจัดส่ง</span>
               <span>(คำนวณภายหลัง)</span>
             </div>
-            <hr className="my-3 border-stone-200" /> 
+            <hr className="my-3 border-stone-200" />
             <div className="flex justify-between font-bold text-xl text-stone-800 mb-4">
               <span>รวมทั้งหมด</span>
               <span>฿{totalPrice.toFixed(2)}</span>

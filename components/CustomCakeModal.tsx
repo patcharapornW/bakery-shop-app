@@ -1,8 +1,15 @@
+/**
+ * CustomCakeModal Component
+ * Modal สำหรับปรับแต่งเค้ก: เลือกรส, ครีม, ท็อปปิ้ง, ข้อความ, และจำนวน
+ */
+
 "use client";
 
 import React, { useState, useEffect } from "react";
 import type { Product, CustomCakePayload } from "@/types";
 import { Check, Palette, X } from "lucide-react";
+
+// ========== Types ==========
 
 interface CustomCakeModalProps {
   open: boolean;
@@ -12,7 +19,9 @@ interface CustomCakeModalProps {
   isAdding: boolean;
 }
 
-// รายการ Topping
+// ========== Constants ==========
+
+// รายการของตกแต่ง (เลือกได้สูงสุด 3 อย่าง)
 const TOPPINGS = [
   { id: "strawberry", label: "สตรอว์เบอร์รี" },
   { id: "blueberry", label: "บลูเบอร์รี" },
@@ -21,6 +30,8 @@ const TOPPINGS = [
   { id: "jelly", label: "เยลลี่" },
   { id: "kitkat", label: "คิตแคต" },
 ];
+
+// ========== Main Component ==========
 
 export default function CustomCakeModal({
   open,
@@ -35,6 +46,7 @@ export default function CustomCakeModal({
   const [qty, setQty] = useState(1);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
 
+  // รีเซ็ตฟอร์มเมื่อปิด Modal
   useEffect(() => {
     if (!open) {
       setTimeout(() => {
@@ -49,6 +61,7 @@ export default function CustomCakeModal({
 
   if (!open) return null;
 
+  // เลือก/ยกเลิกการเลือกของตกแต่ง (จำกัดสูงสุด 3 อย่าง)
   const toggleTopping = (toppingId: string) => {
     setSelectedToppings((prev) => {
       if (prev.includes(toppingId)) {
@@ -63,6 +76,7 @@ export default function CustomCakeModal({
 
   const totalPrice = product?.price || 0;
 
+  // ส่งข้อมูลเค้กที่ปรับแต่งแล้วไปเพิ่มลงตะกร้า
   const handleSubmit = () => {
     if (!product || isAdding) return;
     onAddCustom({
@@ -84,8 +98,6 @@ export default function CustomCakeModal({
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-stone-100 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto scrollbar-hide">
-        
-        {/* Header */}
         <div className="flex justify-between items-center mb-6 border-b border-stone-100 pb-4 sticky top-0 bg-white z-10">
           <h3 className="text-2xl font-bold text-stone-800 flex items-center gap-2">
             <Palette className="w-5 h-5 text-stone-500" /> ปรับแต่งเค้ก
@@ -99,7 +111,6 @@ export default function CustomCakeModal({
         </div>
 
         <div className="space-y-6">
-          {/* ชื่อสินค้า */}
           <div>
             <label className="block text-sm font-bold text-stone-700 mb-1">
               สินค้าที่เลือก
@@ -111,7 +122,6 @@ export default function CustomCakeModal({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* เลือกรสชาติ (Standard Select) */}
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-1">
                 รสเค้ก
@@ -127,8 +137,6 @@ export default function CustomCakeModal({
                 <option value="ชาไทย">ชาไทย</option>
               </select>
             </div>
-            
-            {/* เลือกหน้าเค้ก (Standard Select) */}
             <div>
               <label className="block text-sm font-bold text-stone-700 mb-1">
                 ครีม/หน้า
@@ -146,20 +154,30 @@ export default function CustomCakeModal({
             </div>
           </div>
 
-          {/* ส่วนเลือก Topping */}
           <div>
             <div className="flex justify-between items-end mb-2">
               <label className="block text-sm font-bold text-stone-700">
-                ของตกแต่ง <span className="font-normal text-stone-400 text-xs">(เลือกฟรี)</span>
+                ของตกแต่ง{" "}
+                <span className="font-normal text-stone-400 text-xs">
+                  (เลือกฟรี)
+                </span>
               </label>
-              <span className={`text-xs font-bold ${selectedToppings.length >= 3 ? "text-red-500" : "text-stone-500"}`}>
+              <span
+                className={`text-xs font-bold ${
+                  selectedToppings.length >= 3
+                    ? "text-red-500"
+                    : "text-stone-500"
+                }`}
+              >
                 เลือกแล้ว {selectedToppings.length}/3
               </span>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
               {TOPPINGS.map((t) => {
-                const isDisabled = selectedToppings.length >= 3 && !selectedToppings.includes(t.id);
+                const isDisabled =
+                  selectedToppings.length >= 3 &&
+                  !selectedToppings.includes(t.id);
                 return (
                   <label
                     key={t.id}
@@ -195,7 +213,6 @@ export default function CustomCakeModal({
             </div>
           </div>
 
-          {/* ข้อความหน้าเค้ก */}
           <div>
             <label className="block text-sm font-bold text-stone-700 mb-1">
               ข้อความบนหน้าเค้ก{" "}
@@ -211,7 +228,6 @@ export default function CustomCakeModal({
             />
           </div>
 
-          {/* จำนวน & ราคารวม */}
           <div className="flex items-center justify-between bg-stone-800 text-white p-4 rounded-xl shadow-lg mt-4">
             <div>
               <p className="text-xs opacity-80">ราคารวม</p>
@@ -235,7 +251,6 @@ export default function CustomCakeModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-6 flex gap-3">
           <button
             onClick={onClose}

@@ -10,7 +10,7 @@ export default function AuthForm({ onClose }: { onClose?: () => void }) {
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [loading, setLoading] = useState(false);
   const { showAlert } = useAlert();
-
+  // ฟังก์ชันส่งข้อมูล
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -35,7 +35,7 @@ export default function AuthForm({ onClose }: { onClose?: () => void }) {
       setPassword("");
       onClose?.();
     } catch (err) {
-      // ✅ จัดการ type error อย่างปลอดภัยโดยไม่ใช้ any
+      //  จัดการ type error อย่างปลอดภัยโดยไม่ใช้ any
       if (err instanceof Error) {
         showAlert("เกิดข้อผิดพลาด", err.message, "error");
       } else {

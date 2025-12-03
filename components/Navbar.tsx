@@ -1,3 +1,8 @@
+/**
+ * Navbar Component
+ * แถบนำทาง: โลโก้, ลิงก์, ตะกร้า, ค้นหา, และเมนูผู้ใช้
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -17,6 +22,8 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+// ========== Main Component ==========
+
 export const Navbar = () => {
   const { user } = useSupabaseAuth();
   const router = useRouter();
@@ -26,6 +33,7 @@ export const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ค้นหาสินค้าและ redirect ไปหน้า /menu
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -35,6 +43,7 @@ export const Navbar = () => {
     }
   };
 
+  // ดึงจำนวนสินค้าในตะกร้า (Real-time update)
   useEffect(() => {
     let mounted = true;
     async function fetchCount() {
@@ -51,7 +60,8 @@ export const Navbar = () => {
     }
     fetchCount();
 
-    // ✅ 2. เปลี่ยนจาก any เป็น RealtimeChannel | null
+    // ========== Real-time Subscription ==========
+    // สร้าง Real-time channel เพื่ออัปเดตจำนวนสินค้าในตะกร้าแบบ Real-time
     let channel: RealtimeChannel | null = null;
 
     if (user) {
@@ -60,21 +70,23 @@ export const Navbar = () => {
         .on(
           "postgres_changes",
           {
-            event: "*",
+            event: "*", // ฟังทุก event (INSERT, UPDATE, DELETE)
             schema: "public",
             table: "cart_items",
-            filter: `user_id=eq.${user.id}`,
+            filter: `user_id=eq.${user.id}`, // ฟังเฉพาะของ user นี้
           },
-          () => fetchCount()
+          () => fetchCount() // อัปเดตจำนวนเมื่อมีการเปลี่ยนแปลง
         )
         .subscribe();
     }
+    
     return () => {
       mounted = false;
-      if (channel) supabase.removeChannel(channel);
+      if (channel) supabase.removeChannel(channel); // ลบ subscription
     };
   }, [user]);
 
+  // ตรวจสอบว่าผู้ใช้เป็น Admin หรือไม่
   useEffect(() => {
     let active = true;
     if (!user) {
@@ -149,7 +161,6 @@ export const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Search Button */}
             <button
               onClick={() => setShowSearch(true)}
               className="p-2 rounded-full hover:bg-stone-100 transition-colors group"
@@ -249,7 +260,6 @@ export const Navbar = () => {
         </div>
       )}
 
-      {/* Search Modal */}
       {showSearch && (
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 md:pt-32 z-50 p-4"
