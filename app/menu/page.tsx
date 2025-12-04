@@ -190,23 +190,29 @@ function MenuPageContent({ searchQuery }: { searchQuery: string }) {
       {/* หมวดหมู่ */}
       <div className="flex flex-wrap justify-center gap-3 mb-10 overflow-x-auto pb-2 px-2 scrollbar-hide">
         {CATEGORIES.map((cat) => (
-          <button
+          <motion.button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className={`
-              px-5 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap shadow-sm border
+              px-5 py-3 rounded-2xl text-sm font-bold transition-all whitespace-nowrap shadow-lg border-2 relative overflow-hidden
               ${
                 selectedCategory === cat.id
-                  ? "bg-stone-900 text-white scale-105 shadow-md border-stone-900" // สถานะที่เลือกอยู่
-                  : "bg-white text-stone-600 border-stone-200 hover:bg-stone-100 hover:border-stone-300" // สถานะปกติ
+                  ? "bg-gradient-to-r from-stone-900 to-stone-800 text-white border-stone-900 shadow-xl scale-105" 
+                  : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50 hover:border-stone-300 hover:shadow-xl"
               }
             `}
           >
-            <span className="inline-flex items-center gap-2">
-              <cat.icon className="w-4 h-4" />
+            {/* Background effect when selected */}
+            {selectedCategory === cat.id && (
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-transparent to-amber-500/20 animate-pulse" />
+            )}
+            <span className="relative z-10 inline-flex items-center gap-2">
+              <cat.icon className={`w-4 h-4 ${selectedCategory === cat.id ? "text-amber-300" : "text-stone-500"}`} />
               {cat.label}
             </span>
-          </button>
+          </motion.button>
         ))}
       </div>
 

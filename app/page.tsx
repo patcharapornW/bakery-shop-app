@@ -22,6 +22,8 @@ import {
   Award,
   Heart,
   Clock,
+  ShoppingBag,
+  Menu,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -131,7 +133,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight"
               >
                 FRESHLY BAKED
                 <br />
@@ -154,20 +156,22 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.8 }}
-                className="flex flex-wrap gap-4 pt-4"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4"
               >
                 <Link
                   href="/menu"
-                  className="inline-flex items-center gap-2 bg-white text-stone-900 font-bold py-4 px-8 rounded-full shadow-xl hover:bg-stone-100 hover:scale-105 transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-stone-900 font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full shadow-xl hover:bg-stone-100 hover:scale-105 active:scale-95 transition-all text-sm sm:text-base"
                 >
-                  เริ่มต้นใช้งาน
-                  <ArrowRight className="w-5 h-5" />
+                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>เริ่มต้นใช้งาน</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold py-4 px-8 rounded-full hover:bg-white/20 transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md border-2 border-white/30 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full hover:bg-white/20 active:scale-95 transition-all text-sm sm:text-base"
                 >
-                  เรียนรู้เพิ่มเติม
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>เรียนรู้เพิ่มเติม</span>
                 </Link>
               </motion.div>
             </motion.div>
@@ -175,8 +179,8 @@ export default function HomePage() {
         </div>
 
         {/* สินค้า */}
-        <div className="container mx-auto px-4 mt-8">
-          <h2 className="text-3xl font-bold text-center text-stone-800 mb-8">
+        <div className="container mx-auto px-4 sm:px-6 mt-8 sm:mt-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-stone-800 mb-6 sm:mb-8">
             เมนูยอดฮิต
           </h2>
 
@@ -185,32 +189,31 @@ export default function HomePage() {
               <div className="w-10 h-10 border-4 border-stone-300 border-t-stone-600 rounded-full animate-spin"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {products.length > 0 ? (
                 products.map((item) => (
                   <ProductCard
                     key={item.id}
                     product={item}
-                    onOpenCustom={openForCustom} // ส่งฟังก์ชันเปิด Modal
+                    onOpenCustom={openForCustom}
                   />
                 ))
               ) : (
-                <div className="col-span-full text-center text-stone-500">
+                <div className="col-span-full text-center text-stone-500 py-8">
                   ยังไม่มีสินค้าแนะนำ
                 </div>
               )}
             </div>
           )}
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 sm:mt-12">
             <Link
               href="/menu"
-              className="inline-block px-8 py-2 border-2 border-stone-600 text-stone-600 text-lg font-semibold rounded-full hover:bg-stone-600 hover:text-white transition-colors duration-300"
+              className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 border-2 border-stone-600 text-stone-600 text-base sm:text-lg font-semibold rounded-full hover:bg-stone-600 hover:text-white transition-colors duration-300 active:scale-95"
             >
-              <span className="inline-flex items-center gap-2">
-                ดูรายการขนมเพิ่มเติม
-                <ArrowRight className="w-4 h-4" />
-              </span>
+              <Menu className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>ดูรายการขนมเพิ่มเติม</span>
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
           </div>
         </div>
@@ -322,10 +325,11 @@ export default function HomePage() {
               >
                 <Link
                   href="/contact"
-                  className="inline-flex items-center gap-2 bg-white text-stone-900 font-bold py-3 px-8 rounded-full shadow-xl hover:bg-stone-100 transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-white text-stone-900 font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full shadow-xl hover:bg-stone-100 active:scale-95 transition-all text-sm sm:text-base"
                 >
-                  ติดต่อเรา
-                  <ArrowRight className="w-5 h-5" />
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>ติดต่อเรา</span>
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </motion.div>
             </motion.div>
@@ -334,8 +338,8 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-stone-800 text-stone-300 py-12 mt-auto">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+      <footer className="bg-stone-800 text-stone-300 py-8 sm:py-12 mt-auto">
+        <div className="container mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center md:text-left">
           {/* Column 1: Logo & คำอธิบาย */}
           <div>
             <h3 className="text-2xl font-bold text-white mb-4 font-sans tracking-wide">

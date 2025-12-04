@@ -27,3 +27,26 @@
 .cart-pop-animation {
   animation: pop 0.3s ease-in-out;
 }
+
+/* Torn ticket effect */
+.torn-edge {
+  position: relative;
+}
+
+.torn-edge::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: 
+    radial-gradient(circle at 0 0, transparent 8px, #fbf4eb 8px),
+    radial-gradient(circle at 20px 0, transparent 8px, #fbf4eb 8px),
+    radial-gradient(circle at 40px 0, transparent 8px, #fbf4eb 8px),
+    radial-gradient(circle at 60px 0, transparent 8px, #fbf4eb 8px),
+    radial-gradient(circle at 80px 0, transparent 8px, #fbf4eb 8px),
+    radial-gradient(circle at 100px 0, transparent 8px, #fbf4eb 8px);
+  background-size: 20px 12px;
+  background-repeat: repeat-x;
+}

@@ -5,6 +5,7 @@ import { AlertProvider } from "@/components/AlertProvider";
 
 // ✅ 1. Import Navbar
 import { Navbar } from "@/components/Navbar";
+import { BottomNavBar } from "@/components/BottomNavBar";
 
 const mali = Mali({
   subsets: ["thai", "latin"],
@@ -27,7 +28,8 @@ export default function RootLayout({
       <body className={mali.variable}>
         <AlertProvider>
           <Navbar />
-          <main>{children}</main>
+          <main className="pb-16 md:pb-0">{children}</main>
+          <BottomNavBar />
         </AlertProvider>
       </body>
     </html>
