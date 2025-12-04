@@ -17,15 +17,34 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [birthdayLocked, setBirthdayLocked] = useState(false); 
 
   useEffect(() => {
     if (user) {
       setName(user.user_metadata?.full_name || "");
       setEmail(user.email || "");
       setImagePreview(user.user_metadata?.avatar_url || null);
+      // แปลงวันเกิดจาก ISO string เป็น format YYYY-MM-DD สำหรับ input type="date"
+      if (user.user_metadata?.birthday) {
+        try {
+          const date = new Date(user.user_metadata.birthday);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          setBirthday(`${year}-${month}-${day}`);
+          setBirthdayLocked(true); // ล็อควันเกิดเมื่อมีข้อมูลแล้ว
+        } catch {
+          setBirthday("");
+          setBirthdayLocked(false);
+        }
+      } else {
+        setBirthday("");
+        setBirthdayLocked(false);
+      }
     }
   }, [user]);
 
@@ -76,6 +95,7 @@ export default function ProfilePage() {
         data: {
           full_name: name,
           avatar_url: avatarUrl,
+          birthday: birthday ? new Date(birthday).toISOString() : null,
         },
       });
 
@@ -180,6 +200,58 @@ export default function ProfilePage() {
                 disabled
                 className="w-full p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-500 cursor-not-allowed"
               />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-bold text-stone-700 mb-2">
+                <span>วันเกิด</span>
+                {birthdayLocked && (
+                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">
+                    ล็อคแล้ว
+                  </span>
+                )}
+                <span className="text-stone-400 font-normal text-xs">
+                  (สำหรับใช้โค้ด HBD10)
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={birthday}
+                  onChange={(e) => !birthdayLocked && setBirthday(e.target.value)}
+                  disabled={birthdayLocked}
+                  max={new Date().toISOString().split("T")[0]}
+                  className={`w-full p-4 bg-gradient-to-br ${
+                    birthdayLocked
+                      ? "from-stone-100 to-stone-50 border-2 border-stone-300"
+                      : "from-blue-50 to-indigo-50 border-2 border-blue-200 focus:border-blue-400"
+                  } rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition-all text-stone-800 font-semibold cursor-pointer disabled:cursor-not-allowed shadow-sm`}
+                />
+                {birthdayLocked && (
+                  <div className="absolute inset-0 flex items-center justify-end pr-4 pointer-events-none">
+                    <span className="text-xs bg-stone-800 text-white px-3 py-1 rounded-full font-bold">
+                      ไม่สามารถแก้ไขได้
+                    </span>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-stone-500 mt-2 flex items-center gap-1">
+                {birthdayLocked ? (
+                  <>
+                    <span className="text-amber-600 font-semibold">
+                      วันเกิดถูกล็อคแล้ว
+                    </span>
+                    <span>เพื่อความปลอดภัยของข้อมูล</span>
+                  </>
+                ) : (
+                  <>
+                    <span>กรุณากรอกวันเกิดเพื่อใช้โค้ด HBD10</span>
+                    <span className="text-amber-600 font-semibold">
+                      (ตั้งแล้วแก้ไขไม่ได้)
+                    </span>
+                  </>
+                )}
+              </p>
             </div>
           </div>
 
