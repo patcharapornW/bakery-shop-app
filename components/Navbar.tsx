@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   ShoppingBag,
   Search,
+  // 1. เพิ่ม MessageSquare icon สำหรับเมนูใหม่
+  MessageSquare,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -79,7 +81,7 @@ export const Navbar = () => {
         )
         .subscribe();
     }
-    
+
     return () => {
       mounted = false;
       if (channel) supabase.removeChannel(channel); // ลบ subscription
@@ -213,30 +215,41 @@ export const Navbar = () => {
                     href="/profile"
                     className="px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors flex items-center gap-2"
                   >
-                  <PencilLine className="w-4 h-4" /> แก้ไขโปรไฟล์
+                    <PencilLine className="w-4 h-4" /> แก้ไขโปรไฟล์
                   </Link>
 
                   <Link
                     href="/orders"
                     className="px-4 py-3 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors flex items-center gap-2 border-t border-stone-50"
                   >
-                  <ReceiptText className="w-4 h-4" /> ประวัติการสั่งซื้อ
+                    <ReceiptText className="w-4 h-4" /> ประวัติการสั่งซื้อ
                   </Link>
 
                   {isAdmin && (
-                    <Link
-                      href="/admin"
-                      className="px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-800 transition-colors flex items-center gap-2 border-t border-stone-50"
-                    >
-                    <ShieldCheck className="w-4 h-4" /> จัดการสินค้า
-                    </Link>
+                    <>
+                      {/* 2. เพิ่มรายการ "ข้อความจากลูกค้า" เข้าไปในส่วน Admin และเปลี่ยนสีเป็นเขียว */}
+                      <Link
+                        href="/admin/messages"
+                        className="px-4 py-3 text-sm text-green-600 hover:bg-green-50 hover:text-green-800 transition-colors flex items-center gap-2 border-t border-stone-50"
+                      >
+                        <MessageSquare className="w-4 h-4" /> ข้อความจากลูกค้า
+                      </Link>
+                      
+                      {/* รายการ "จัดการสินค้า" เดิม */}
+                      <Link
+                        href="/admin"
+                        className="px-4 py-3 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-800 transition-colors flex items-center gap-2"
+                      >
+                        <ShieldCheck className="w-4 h-4" /> จัดการสินค้า
+                      </Link>
+                    </>
                   )}
 
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 border-t border-stone-50"
                   >
-                  <LogOut className="w-4 h-4" /> ออกจากระบบ
+                    <LogOut className="w-4 h-4" /> ออกจากระบบ
                   </button>
                 </div>
               </div>
