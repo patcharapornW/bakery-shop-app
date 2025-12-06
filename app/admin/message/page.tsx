@@ -185,7 +185,7 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="พิมพ์ข้อความตอบกลับ..."
-                        className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-600 transition-all text-stone-800 placeholder-stone-400"
+                        className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-600 transition-all text-white placeholder-stone-400"
                         autoFocus
                         disabled={sending}
                     />
@@ -290,7 +290,7 @@ const MessageItem = ({ message, onClick }: { message: ContactMessage, onClick: (
 // ========== Main Admin Messages Page Component ==========
 
 export default function AdminMessagesPage() {
-    const { user } = useSupabaseAuth();
+    const { user, isLoading: authLoading } = useSupabaseAuth();
     const router = useRouter();
     const { showAlert } = useAlert();
     const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
@@ -318,11 +318,16 @@ export default function AdminMessagesPage() {
 
     // ตรวจสอบสิทธิ์ Admin
     useEffect(() => {
+        // รอให้ auth loading เสร็จก่อน
+        if (authLoading) return;
+
         async function checkAdmin() {
             if (!user) {
                 router.replace('/login');
                 return;
             }
+
+            console.log('Checking admin for user:', user.id, user.email);
 
             const { data, error } = await supabase
                 .from('profiles')
@@ -330,18 +335,34 @@ export default function AdminMessagesPage() {
                 .eq('id', user.id)
                 .single();
 
-            if (error || !data || data.role !== 'admin') {
+            console.log('Profile query result:', { data, error });
+
+            if (error) {
+                console.error('Error fetching profile:', error);
+                showAlert('เกิดข้อผิดพลาด', `ไม่สามารถตรวจสอบสิทธิ์ได้: ${error.message}`, 'error');
+                return;
+            }
+
+            if (!data) {
+                console.error('No profile found for user:', user.id);
+                showAlert('เข้าไม่ได้', 'ไม่พบข้อมูลโปรไฟล์ กรุณาติดต่อผู้ดูแลระบบ', 'error', () => router.replace('/'));
+                return;
+            }
+
+            if (data.role !== 'admin') {
+                console.log('User is not admin. Role:', data.role);
                 showAlert('เข้าไม่ได้', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้!', 'error', () => router.replace('/'));
                 return;
             }
 
+            console.log('Admin access granted');
             setIsAdmin(true);
             fetchMessages();
         }
 
         checkAdmin();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, router, showAlert]);
+    }, [user, authLoading, router, showAlert]);
 
     // คำนวณจำนวนข้อความที่ยังไม่ได้ตอบ
     const unreadCount = messages.filter(msg => msg.status === 'unread').length;
@@ -359,7 +380,7 @@ export default function AdminMessagesPage() {
         );
     }
 
-    if (!isAdmin || loading) {
+    if (authLoading || !isAdmin || loading) {
         return (
             <div className="min-h-screen bg-stone-50 flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-stone-200 border-t-stone-600 rounded-full animate-spin" />
@@ -372,7 +393,7 @@ export default function AdminMessagesPage() {
             <header className="mb-8 border-b pb-4">
                 <h1 className="text-3xl font-extrabold text-stone-900 flex items-center gap-3">
                     <MessageSquareText className="w-8 h-8 text-green-600" />
-                    หน้าจัดการข้อความลูกค้า
+                    ข้อความจากลูกค้า
                 </h1>
                 <p className="text-stone-500 mt-1">ดูและตอบกลับข้อความสอบถามและแชททั้งหมดจากลูกค้า</p>
             </header>

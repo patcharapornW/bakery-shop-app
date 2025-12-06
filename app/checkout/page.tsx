@@ -722,12 +722,18 @@ export default function CheckoutPage() {
                   const validation = isCouponValid(coupon.code);
                   const style = getCouponStyle(coupon.code, validation.valid);
                   return (
-                    <button
+                    <div
                       key={coupon.code}
-                      type="button"
-                      onClick={() => handleSelectSavedCoupon(coupon)}
-                      disabled={!validation.valid}
-                      className={`w-full text-left p-3 rounded-xl border-2 transition-all flex items-center justify-between group ${style.bg} ${style.border} ${style.hover} disabled:opacity-60 disabled:cursor-not-allowed`}
+                      onClick={() => {
+                        if (validation.valid) {
+                          handleSelectSavedCoupon(coupon);
+                        }
+                      }}
+                      className={`w-full text-left p-3 rounded-xl border-2 transition-all flex items-center justify-between group ${
+                        validation.valid 
+                          ? `${style.bg} ${style.border} ${style.hover} cursor-pointer` 
+                          : 'bg-stone-100 border-stone-200 opacity-60 cursor-not-allowed'
+                      }`}
                     >
                       <div className="flex-1 min-w-0">
                         <div
@@ -758,11 +764,12 @@ export default function CheckoutPage() {
                             setSavedCoupons(getSavedCoupons());
                           }}
                           className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 rounded-lg transition-all"
+                          aria-label="ลบโค้ดส่วนลด"
                         >
                           <X className="w-4 h-4 text-red-500" />
                         </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

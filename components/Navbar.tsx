@@ -21,6 +21,7 @@ import {
   Search,
   // 1. เพิ่ม MessageSquare icon สำหรับเมนูใหม่
   MessageSquare,
+  Package,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -229,10 +230,18 @@ export const Navbar = () => {
                     <>
                       {/* 2. เพิ่มรายการ "ข้อความจากลูกค้า" เข้าไปในส่วน Admin และเปลี่ยนสีเป็นเขียว */}
                       <Link
-                        href="/admin/messages"
+                        href="/admin/message"
                         className="px-4 py-3 text-sm text-green-600 hover:bg-green-50 hover:text-green-800 transition-colors flex items-center gap-2 border-t border-stone-50"
                       >
                         <MessageSquare className="w-4 h-4" /> ข้อความจากลูกค้า
+                      </Link>
+                      
+                      {/* รายการ "จัดการออเดอร์" */}
+                      <Link
+                        href="/admin/orders"
+                        className="px-4 py-3 text-sm text-purple-600 hover:bg-purple-50 hover:text-purple-800 transition-colors flex items-center gap-2"
+                      >
+                        <Package className="w-4 h-4" /> จัดการออเดอร์
                       </Link>
                       
                       {/* รายการ "จัดการสินค้า" เดิม */}
