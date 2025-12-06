@@ -21,7 +21,7 @@ export default function ProfilePage() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [birthdayLocked, setBirthdayLocked] = useState(false); 
+  const [birthdayLocked, setBirthdayLocked] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -205,11 +205,6 @@ export default function ProfilePage() {
             <div>
               <label className="flex items-center gap-2 text-sm font-bold text-stone-700 mb-2">
                 <span>วันเกิด</span>
-                {birthdayLocked && (
-                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">
-                    ล็อคแล้ว
-                  </span>
-                )}
                 <span className="text-stone-400 font-normal text-xs">
                   (สำหรับใช้โค้ด HBD10)
                 </span>
@@ -218,7 +213,9 @@ export default function ProfilePage() {
                 <input
                   type="date"
                   value={birthday}
-                  onChange={(e) => !birthdayLocked && setBirthday(e.target.value)}
+                  onChange={(e) =>
+                    !birthdayLocked && setBirthday(e.target.value)
+                  }
                   disabled={birthdayLocked}
                   max={new Date().toISOString().split("T")[0]}
                   className={`w-full p-4 bg-gradient-to-br ${
@@ -239,7 +236,7 @@ export default function ProfilePage() {
                 {birthdayLocked ? (
                   <>
                     <span className="text-amber-600 font-semibold">
-                      วันเกิดถูกล็อคแล้ว
+                      ไม่สามารถแก้ไขได้
                     </span>
                     <span>เพื่อความปลอดภัยของข้อมูล</span>
                   </>

@@ -134,14 +134,14 @@ function MenuPageContent({ searchQuery }: { searchQuery: string }) {
         "เพิ่มสินค้าไม่สำเร็จ",
         "เกิดข้อผิดพลาดในการเพิ่มสินค้าลงตะกร้า",
         "error"
-      );
+      ); 
     } else {
       setOpenCustom(false);
       showAlert(
         "เพิ่มสินค้าสำเร็จ",
         "เพิ่มสินค้าลงในตะกร้าเรียบร้อยแล้ว",
         "success"
-      );
+      ); 
     }
   };
 
@@ -181,9 +181,9 @@ function MenuPageContent({ searchQuery }: { searchQuery: string }) {
             )}
           </p>
         ) : (
-          <p className="text-stone-500 text-lg">
-            เลือกความอร่อยที่คุณชื่นชอบได้เลย
-          </p>
+        <p className="text-stone-500 text-lg">
+          เลือกความอร่อยที่คุณชื่นชอบได้เลย
+        </p>
         )}
       </div>
 
@@ -210,7 +210,7 @@ function MenuPageContent({ searchQuery }: { searchQuery: string }) {
             )}
             <span className="relative z-10 inline-flex items-center gap-2">
               <cat.icon className={`w-4 h-4 ${selectedCategory === cat.id ? "text-amber-300" : "text-stone-500"}`} />
-              {cat.label}
+            {cat.label}
             </span>
           </motion.button>
         ))}
@@ -262,7 +262,7 @@ export default function MenuPage() {
             <div className="w-8 h-8 border-4 border-stone-300 border-t-stone-600 rounded-full animate-spin"></div>
             <p>กำลังโหลด...</p>
           </div>
-        </div>
+    </div>
       }
     >
       <SearchQueryHandler onSearchChange={handleSearchChange} />

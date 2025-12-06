@@ -158,8 +158,8 @@ export default function HomePage() {
                 transition={{ delay: 0.7, duration: 0.8 }}
                 className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4"
               >
-                <Link
-                  href="/menu"
+              <Link
+                href="/menu"
                   className="inline-flex items-center justify-center gap-2 bg-white text-stone-900 font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-full shadow-xl hover:bg-stone-100 hover:scale-105 active:scale-95 transition-all text-sm sm:text-base"
                 >
                   <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -172,7 +172,7 @@ export default function HomePage() {
                 >
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span>เรียนรู้เพิ่มเติม</span>
-                </Link>
+              </Link>
               </motion.div>
             </motion.div>
           </div>
