@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   ShoppingBag,
   Search,
-  // 1. เพิ่ม MessageSquare icon สำหรับเมนูใหม่
   MessageSquare,
   Package,
 } from "lucide-react";

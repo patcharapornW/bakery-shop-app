@@ -38,14 +38,12 @@ export default function ContactPage() {
   const { showAlert } = useAlert();
   const { user } = useSupabaseAuth();
   
-  // State สำหรับแชท
   const [currentMessage, setCurrentMessage] = useState<ContactMessage | null>(null);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatText, setChatText] = useState("");
   const [sendingChat, setSendingChat] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
 
-  // ดึงข้อความล่าสุดของผู้ใช้ (ถ้ามี)
   useEffect(() => {
     if (!user) return;
 
@@ -65,7 +63,6 @@ export default function ContactPage() {
 
       if (data) {
         setCurrentMessage(data);
-        // ดึงประวัติการแชท
         setLoadingChat(true);
         try {
           const { data: repliesData, error: repliesError } = await supabase
@@ -76,7 +73,6 @@ export default function ContactPage() {
 
           if (repliesError) throw repliesError;
 
-          // เพิ่มข้อความแรกจากผู้ใช้
           const initialMessage: ChatMessage = {
             id: 'initial',
             message_id: data.id,
@@ -96,7 +92,6 @@ export default function ContactPage() {
     fetchLatestMessage();
   }, [user]);
 
-  // ดึงประวัติการแชท
   const fetchChatHistory = async (messageId: string) => {
     setLoadingChat(true);
     try {
@@ -108,7 +103,6 @@ export default function ContactPage() {
 
       if (error) throw error;
 
-      // เพิ่มข้อความแรกจากผู้ใช้
       if (currentMessage) {
         const initialMessage: ChatMessage = {
           id: 'initial',
@@ -128,7 +122,6 @@ export default function ContactPage() {
     }
   };
 
-  // Real-time subscription สำหรับข้อความใหม่
   useEffect(() => {
     if (!currentMessage) return;
 
@@ -143,7 +136,6 @@ export default function ContactPage() {
           filter: `message_id=eq.${currentMessage.id}`,
         },
         async () => {
-          // ดึงประวัติใหม่
           setLoadingChat(true);
           try {
             const { data, error } = await supabase
@@ -154,7 +146,6 @@ export default function ContactPage() {
 
             if (error) throw error;
 
-            // เพิ่มข้อความแรกจากผู้ใช้
             const initialMessage: ChatMessage = {
               id: 'initial',
               message_id: currentMessage.id,
@@ -182,7 +173,6 @@ export default function ContactPage() {
     setSubmitting(true);
 
     try {
-      // บันทึกข้อความลงฐานข้อมูล
       const { data, error } = await supabase
         .from("contact_messages")
         .insert([
@@ -199,13 +189,12 @@ export default function ContactPage() {
 
       if (error) throw error;
 
-      // ตั้งค่า currentMessage และดึงประวัติ
       setCurrentMessage(data);
       fetchChatHistory(data.id);
 
       showAlert(
         "ส่งข้อความเรียบร้อย",
-        `ขอบคุณครับคุณ ${form.name} เราได้รับข้อความแล้ว! เราจะติดต่อกลับโดยเร็วที่สุด`,
+        `ขอบคุณค่ะคุณ ${form.name} เราได้รับข้อความแล้ว! จะรีบตอบกลับให้เร็วที่สุดเลยค่ะ`,
         "success"
       );
       setForm({ name: "", email: "", message: "" });
@@ -213,7 +202,7 @@ export default function ContactPage() {
       console.error("Error submitting message:", error);
       showAlert(
         "เกิดข้อผิดพลาด",
-        "ไม่สามารถส่งข้อความได้ กรุณาลองใหม่อีกครั้ง",
+        "ไม่สามารถส่งข้อความได้ กรุณาลองใหม่อีกครั้งนะคะ",
         "error"
       );
     } finally {
@@ -221,14 +210,12 @@ export default function ContactPage() {
     }
   };
 
-  // ส่งข้อความใหม่ในแชท
   const handleSendChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatText.trim() || !currentMessage || !user) return;
 
     setSendingChat(true);
     try {
-      // สร้างข้อความใหม่ใน message_replies
       const { error: replyError } = await supabase
         .from("message_replies")
         .insert([
@@ -241,20 +228,16 @@ export default function ContactPage() {
 
       if (replyError) throw replyError;
 
-      // อัปเดตสถานะข้อความเป็น 'unread' เพื่อให้ admin เห็นว่ามีข้อความใหม่
       await supabase
         .from("contact_messages")
         .update({ status: 'unread' })
         .eq("id", currentMessage.id);
 
-      // ดึงประวัติใหม่
       fetchChatHistory(currentMessage.id);
       setChatText("");
-
-      showAlert("ส่งข้อความสำเร็จ", "ข้อความของคุณถูกส่งแล้ว", "success");
     } catch (error) {
       console.error("Error sending chat:", error);
-      showAlert("เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อความได้", "error");
+      showAlert("เกิดข้อผิดพลาด", "ไม่สามารถส่งข้อความได้ค่ะ", "error");
     } finally {
       setSendingChat(false);
     }
@@ -266,219 +249,222 @@ export default function ContactPage() {
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
 
     if (diffMins < 1) return 'เมื่อสักครู่';
     if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
-    if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
-    if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
-    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (diffHours < 24) return `${diffHours} ชม. ที่แล้ว`;
+    return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
   };
 
   return (
-    <div className="min-h-screen bg-[#fbf4eb] py-12 px-4">
-      <div className="container mx-auto max-w-5xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-stone-800 mb-3">ติดต่อเรา</h1>
-          <p className="text-stone-500 text-lg">
-            สอบถามข้อมูล สั่งทำเค้ก หรือติชมบริการ
+    <div className="min-h-screen bg-bakery-cream py-16 px-4">
+      <div className="container mx-auto max-w-6xl">
+        <div className="text-center mb-16 space-y-4">
+          <span className="text-xs font-black tracking-[0.3em] text-bakery-pink uppercase bg-white px-4 py-1.5 rounded-full border border-pink-100 shadow-sm">
+            Contact Us
+          </span>
+          <h1 className="text-5xl font-black text-bakery-black tracking-tight">ติดต่อสอบถาม</h1>
+          <p className="text-stone-500 text-lg max-w-xl mx-auto font-medium">
+            มีคำถามเรื่องขนม หรืออยากสั่งทำเค้กพิเศษ <br /> ทักแชทคุยกับเราได้เลยนะคะ
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* ข้อมูลติดต่อ */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100 h-fit">
-            <h3 className="text-2xl font-bold text-stone-800 mb-6">
-              ช่องทางการติดต่อ
-            </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Contact Cards */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-pink-900/5 border border-pink-50 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-bakery-cream rounded-full -mr-16 -mt-16 group-hover:bg-pink-50 transition-colors duration-500" />
+              
+              <h3 className="text-2xl font-black text-bakery-black mb-8 border-b border-pink-50 pb-4">
+                ช่องทางติดต่อ
+              </h3>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
-                  <MapPin className="w-5 h-5" />
+              <div className="space-y-8 relative z-10">
+                <div className="flex items-start gap-5">
+                  <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-bakery-pink shrink-0 shadow-sm shadow-pink-200">
+                    <MapPin className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-bakery-black">ที่อยู่ร้าน</h4>
+                    <p className="text-stone-500 text-sm mt-1 leading-relaxed capitalize">
+                      123 ถนนสุขุมวิท แขวงคลองเตย <br /> เขตคลองเตย กรุงเทพมหานคร 10110
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-stone-700">ที่อยู่ร้าน</h4>
-                  <p className="text-stone-600 text-sm mt-1">
-                    123 ถนนสุขุมวิท แขวงคลองเตย <br /> เขตคลองเตย กรุงเทพมหานคร
-                    10110
-                  </p>
+
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-bakery-pink shrink-0 shadow-sm shadow-pink-200">
+                    <Phone className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-bakery-black">เบอร์โทรศัพท์</h4>
+                    <p className="text-stone-500 text-sm mt-1 font-bold">081-234-5678</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-bakery-pink shrink-0 shadow-sm shadow-pink-200">
+                    <MessageCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-bakery-black">LINE Official</h4>
+                    <p className="text-stone-500 text-sm mt-1 font-bold">@baankanom</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 bg-pink-50 rounded-2xl flex items-center justify-center text-bakery-pink shrink-0 shadow-sm shadow-pink-200">
+                    <Clock3 className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-black text-bakery-black">เวลาทำการ</h4>
+                    <p className="text-stone-500 text-sm mt-1">เปิดทุกวัน: 08:00 - 20:00 น.</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
-                  <Phone className="w-5 h-5" />
+              {/* Fake Map */}
+              <div className="mt-10 h-40 w-full bg-bakery-cream rounded-[2rem] border border-pink-50 flex items-center justify-center overflow-hidden relative shadow-inner group">
+                <div className="absolute inset-0 bg-pink-500/5 group-hover:bg-pink-500/0 transition-colors" />
+                <div className="text-stone-300 font-black text-xs uppercase tracking-widest flex items-center gap-2 group-hover:text-bakery-pink transition-colors">
+                  <MapIcon className="w-4 h-4" />
+                  Google Maps Preview
                 </div>
-                <div>
-                  <h4 className="font-bold text-stone-700">เบอร์โทรศัพท์</h4>
-                  <p className="text-stone-600 text-sm mt-1">081-234-5678</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-stone-700">LINE Official</h4>
-                  <p className="text-stone-600 text-sm mt-1">@baankanom</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-stone-100 rounded-full flex items-center justify-center text-stone-500">
-                  <Clock3 className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-stone-700">เวลาทำการ</h4>
-                  <p className="text-stone-600 text-sm mt-1">
-                    เปิดทุกวัน: 08:00 - 20:00 น.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* แผนที่จำลอง */}
-            <div className="mt-8 h-48 w-full bg-stone-200 rounded-xl flex items-center justify-center overflow-hidden relative">
-              <div className="absolute text-stone-500 font-bold flex items-center gap-2">
-                <MapIcon className="w-5 h-5" />
-                แผนที่ Google Maps
               </div>
             </div>
           </div>
 
-          {/* ฟอร์มส่งข้อความหรือแชท */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border border-stone-100">
-            {currentMessage ? (
-              // แสดงแชทถ้ามีข้อความแล้ว
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <MessageSquare className="w-6 h-6 text-green-600" />
-                  <h3 className="text-2xl font-bold text-stone-800">
-                    แชทกับเรา
-                  </h3>
-                </div>
+          {/* Form / Chat */}
+          <div className="lg:col-span-7 h-full">
+            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-pink-900/5 border border-pink-50 h-full flex flex-col overflow-hidden">
+              {currentMessage ? (
+                // Chat View
+                <div className="flex flex-col h-full min-h-[600px]">
+                  <div className="p-8 border-b border-pink-50 bg-bakery-cream/30 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-bakery-pink flex items-center justify-center text-white shadow-lg shadow-pink-200">
+                        <MessageSquare className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-bakery-black">แชทกับร้าน</h3>
+                        <p className="text-xs text-bakery-pink font-bold uppercase tracking-wider">Online Support</p>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* ประวัติการแชท */}
-                <div className="bg-stone-50 rounded-xl p-4 h-96 overflow-y-auto space-y-3 border border-stone-200">
-                  {loadingChat ? (
-                    <div className="flex items-center justify-center py-10">
-                      <div className="w-8 h-8 border-4 border-stone-200 border-t-stone-600 rounded-full animate-spin" />
-                    </div>
-                  ) : chatHistory.length === 0 ? (
-                    <div className="text-center py-10 text-stone-500">
-                      <p>ยังไม่มีข้อความ</p>
-                    </div>
-                  ) : (
-                    chatHistory.map((chat) => (
-                      <div
-                        key={chat.id}
-                        className={`flex ${chat.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
+                  <div className="flex-1 p-8 overflow-y-auto space-y-6 bg-bakery-cream/10">
+                    {loadingChat ? (
+                      <div className="flex items-center justify-center py-20">
+                        <div className="w-8 h-8 border-4 border-pink-100 border-t-bakery-pink rounded-full animate-spin" />
+                      </div>
+                    ) : (
+                      chatHistory.map((chat) => (
                         <div
-                          className={`max-w-[75%] p-3 rounded-xl shadow-sm ${
-                            chat.sender === 'user'
-                              ? 'bg-stone-800 text-white rounded-br-none'
-                              : 'bg-white text-stone-800 rounded-tl-none border border-stone-200'
-                          }`}
+                          key={chat.id}
+                          className={`flex ${chat.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                          <p className="text-sm break-words leading-relaxed">
-                            {chat.text}
-                          </p>
-                          <span
-                            className={`block mt-1 text-right text-[10px] ${
+                          <div
+                            className={`max-w-[85%] p-4 rounded-3xl shadow-sm ${
                               chat.sender === 'user'
-                                ? 'text-stone-300'
-                                : 'text-stone-500'
+                                ? 'bg-bakery-black text-white rounded-br-none'
+                                : 'bg-white text-stone-800 rounded-tl-none border border-pink-100 shadow-pink-500/5'
                             }`}
                           >
-                            {formatTime(chat.created_at)}
-                          </span>
+                            <p className="text-sm leading-relaxed font-medium">
+                              {chat.text}
+                            </p>
+                            <span
+                              className={`block mt-2 text-[10px] font-bold ${
+                                chat.sender === 'user'
+                                  ? 'text-stone-400'
+                                  : 'text-bakery-pink'
+                              }`}
+                            >
+                              {formatTime(chat.created_at)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                      ))
+                    )}
+                  </div>
 
-                {/* ช่องพิมพ์ข้อความ */}
-                <form onSubmit={handleSendChat} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={chatText}
-                    onChange={(e) => setChatText(e.target.value)}
-                    placeholder="พิมพ์ข้อความ..."
-                    className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:ring-2 focus:ring-stone-400 focus:border-stone-500 transition-all text-stone-800 placeholder-stone-400 bg-white"
-                    disabled={sendingChat}
-                  />
-                  <button
-                    type="submit"
-                    disabled={!chatText.trim() || sendingChat}
-                    className="p-3 bg-stone-800 text-white rounded-xl hover:bg-stone-900 transition-all disabled:bg-stone-400 disabled:cursor-not-allowed flex items-center justify-center"
-                    aria-label="ส่งข้อความ"
-                  >
-                    <Send className="w-5 h-5" />
-                  </button>
-                </form>
-              </div>
-            ) : (
-              // แสดงฟอร์มส่งข้อความแรกถ้ายังไม่มีข้อความ
-              <>
-                <h3 className="text-2xl font-bold text-stone-800 mb-6">
-                  ส่งข้อความถึงเรา
-                </h3>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-stone-700 mb-1">
-                      ชื่อของคุณ
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
-                      placeholder="ชื่อ-นามสกุล"
-                    />
+                  <div className="p-6 bg-white border-t border-pink-50">
+                    <form onSubmit={handleSendChat} className="flex gap-3">
+                      <input
+                        type="text"
+                        value={chatText}
+                        onChange={(e) => setChatText(e.target.value)}
+                        placeholder="พิมพ์ข้อความสอบถามที่นี่..."
+                        className="flex-1 px-6 py-4 bg-bakery-cream border border-pink-100 rounded-2xl focus:ring-2 focus:ring-bakery-pink focus:bg-white outline-none transition-all font-medium text-bakery-black placeholder-stone-400"
+                        disabled={sendingChat}
+                      />
+                      <button
+                        type="submit"
+                        disabled={!chatText.trim() || sendingChat}
+                        className="w-14 h-14 bg-bakery-black text-white rounded-2xl hover:bg-stone-800 hover:scale-105 active:scale-95 transition-all disabled:bg-stone-200 flex items-center justify-center shadow-lg shadow-black/10"
+                      >
+                        <Send className="w-6 h-6" />
+                      </button>
+                    </form>
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-stone-700 mb-1">
-                      อีเมล
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
-                      placeholder="example@email.com"
-                    />
+                </div>
+              ) : (
+                // Initial Form
+                <div className="p-10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center text-bakery-pink">
+                      <Send className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-2xl font-black text-bakery-black">ส่งข้อความ</h3>
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-stone-700 mb-1">
-                      ข้อความ
-                    </label>
-                    <textarea
-                      required
-                      rows={5}
-                      value={form.message}
-                      onChange={(e) =>
-                        setForm({ ...form, message: e.target.value })
-                      }
-                      className="w-full p-3 bg-stone-50 border border-stone-200 rounded-xl outline-none focus:ring-2 focus:ring-stone-400 text-stone-800"
-                      placeholder="พิมพ์ข้อความของคุณที่นี่..."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3 bg-stone-800 text-white font-bold rounded-xl shadow-md hover:bg-stone-900 transition-all transform active:scale-95 disabled:bg-stone-400 disabled:cursor-not-allowed"
-                  >
-                    {submitting ? "กำลังส่ง..." : "ส่งข้อความ"}
-                  </button>
-                </form>
-              </>
-            )}
+                  
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-stone-400 uppercase tracking-widest ml-1">ชื่อของคุณ</label>
+                        <input
+                          type="text"
+                          required
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                          className="w-full px-6 py-4 bg-bakery-cream border border-pink-50 rounded-2xl focus:ring-2 focus:ring-bakery-pink focus:bg-white transition-all outline-none font-bold text-bakery-black"
+                          placeholder="ชื่อ-นามสกุล"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-black text-stone-400 uppercase tracking-widest ml-1">อีเมลติดต่อ</label>
+                        <input
+                          type="email"
+                          required
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                          className="w-full px-6 py-4 bg-bakery-cream border border-pink-50 rounded-2xl focus:ring-2 focus:ring-bakery-pink focus:bg-white transition-all outline-none font-bold text-bakery-black"
+                          placeholder="example@email.com"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-stone-400 uppercase tracking-widest ml-1">ข้อความของคุณ</label>
+                      <textarea
+                        required
+                        rows={6}
+                        value={form.message}
+                        onChange={(e) => setForm({ ...form, message: e.target.value })}
+                        className="w-full px-6 py-4 bg-bakery-cream border border-pink-50 rounded-2xl focus:ring-2 focus:ring-bakery-pink focus:bg-white transition-all outline-none font-medium text-bakery-black resize-none"
+                        placeholder="พิมพ์ข้อความที่ต้องการสอบถามหรือสั่งทำเค้กพิเศษ..."
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-5 bg-bakery-black text-white font-black rounded-2xl shadow-xl shadow-black/10 hover:bg-stone-800 hover:scale-[1.02] active:scale-95 transition-all disabled:bg-stone-200"
+                    >
+                      {submitting ? "กำลังส่งข้อความ..." : "ส่งข้อความหาเรา"}
+                    </button>
+                  </form>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

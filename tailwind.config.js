@@ -13,10 +13,11 @@ module.exports = {
     extend: {
       colors: {
         bakery: {
-          cream: "#FFFBF5", // สีครีมพื้นหลัง
-          "brown-light": "#A1887F", // สีน้ำตาลอ่อน
-          "brown-dark": "#5D4037", // สีน้ำตาลเข้ม
-          accent: "#C62828", // สีแดงแจ้งเตือน
+          cream: "#FDF8F5", // แครม (ครีมอมชมพูอ่อน)
+          pink: "#FF8DA1",  // ชมพูหลัก
+          "pink-light": "#FCE4EC", // ชมพูอ่อน
+          black: "#121212",  // ดำ
+          accent: "#FF4081", // ชมพูเน้น (Accent)
         },
       },
       fontFamily: {

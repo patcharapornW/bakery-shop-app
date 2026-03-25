@@ -40,7 +40,6 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
     const [loading, setLoading] = useState(true);
     const [sending, setSending] = useState(false);
 
-    // ดึงประวัติการแชท
     useEffect(() => {
         async function fetchChatHistory() {
             const { data, error } = await supabase
@@ -54,7 +53,6 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
                 return;
             }
 
-            // เพิ่มข้อความแรกจากผู้ใช้
             const initialMessage: ChatMessage = {
                 id: 'initial',
                 message_id: message.id,
@@ -76,7 +74,6 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
 
         setSending(true);
         try {
-            // บันทึกข้อความตอบกลับ
             const { error: replyError } = await supabase
                 .from('message_replies')
                 .insert([
@@ -90,15 +87,11 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
 
             if (replyError) throw replyError;
 
-            // อัปเดตสถานะข้อความเป็น 'replied'
-            const { error: statusError } = await supabase
+            await supabase
                 .from('contact_messages')
                 .update({ status: 'replied' })
                 .eq('id', message.id);
 
-            if (statusError) throw statusError;
-
-            // เพิ่มข้อความใหม่ใน history
             const newReply: ChatMessage = {
                 id: Date.now().toString(),
                 message_id: message.id,
@@ -109,10 +102,10 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
 
             setHistory(prev => [...prev, newReply]);
             setReplyText('');
-            showAlert('สำเร็จ', 'ส่งข้อความตอบกลับเรียบร้อยแล้ว', 'success');
+            showAlert('สำเร็จ', 'ส่งข้อความตอบกลับเรียบร้อยแล้วค่ะ', 'success');
         } catch (error) {
             console.error('Error sending reply:', error);
-            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อความได้', 'error');
+            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถส่งข้อความได้ค่ะ', 'error');
         } finally {
             setSending(false);
         }
@@ -124,37 +117,40 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
         const diffMs = now.getTime() - date.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
         if (diffMins < 1) return 'เมื่อสักครู่';
         if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
-        if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
-        if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
-        return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+        if (diffHours < 24) return `${diffHours} ชม. ที่แล้ว`;
+        return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
     };
 
     return (
-        <div className="min-h-screen bg-stone-50 flex flex-col max-w-4xl mx-auto border border-stone-100 rounded-xl shadow-2xl overflow-hidden">
+        <div className="flex flex-col h-screen bg-bakery-cream">
             {/* Chat Header */}
-            <div className="p-4 border-b border-stone-200 bg-white flex items-center gap-4 sticky top-0 z-10 shadow-sm">
-                <button 
-                    onClick={onBack} 
-                    className="p-2 rounded-full hover:bg-stone-200 transition-colors shrink-0"
-                    aria-label="ย้อนกลับ"
-                >
-                    <ArrowLeft className="w-6 h-6 text-stone-700" />
-                </button>
-                <div className="flex flex-col min-w-0 flex-1">
-                    <h2 className="text-xl font-bold text-stone-900 truncate">{message.name}</h2>
-                    <p className="text-sm text-stone-500 truncate">{message.email}</p>
+            <div className="p-6 bg-white border-b border-pink-100 flex items-center justify-between sticky top-0 z-10">
+                <div className="flex items-center gap-4">
+                    <button 
+                        onClick={onBack} 
+                        className="w-10 h-10 rounded-xl hover:bg-bakery-cream flex items-center justify-center transition-all active:scale-95 text-stone-600"
+                    >
+                        <ArrowLeft className="w-6 h-6" />
+                    </button>
+                    <div>
+                        <h2 className="text-xl font-black text-bakery-black">{message.name}</h2>
+                        <p className="text-xs font-bold text-bakery-pink uppercase tracking-widest">{message.email}</p>
+                    </div>
+                </div>
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-pink-50 rounded-full border border-pink-100">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-xs font-black text-bakery-pink uppercase tracking-widest">Active Chat</span>
                 </div>
             </div>
 
-            {/* Chat Body (Scrollable) */}
-            <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-stone-50 min-h-[400px]">
+            {/* Chat Body */}
+            <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-bakery-cream/30">
                 {loading ? (
-                    <div className="flex items-center justify-center py-10">
-                        <div className="w-8 h-8 border-4 border-stone-200 border-t-stone-600 rounded-full animate-spin" />
+                    <div className="flex items-center justify-center py-20">
+                        <div className="w-10 h-10 border-4 border-pink-100 border-t-bakery-pink rounded-full animate-spin" />
                     </div>
                 ) : (
                     history.map((chat) => (
@@ -162,13 +158,13 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
                             key={chat.id} 
                             className={`flex ${chat.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[75%] p-3 rounded-xl shadow-md ${
+                            <div className={`max-w-[80%] p-4 rounded-[2rem] shadow-sm ${
                                 chat.sender === 'admin' 
-                                    ? 'bg-green-600 text-white rounded-br-none' 
-                                    : 'bg-white text-stone-800 rounded-tl-none border border-stone-200'
-                            } transition-all duration-300`}>
-                                <p className="text-sm break-words leading-relaxed">{chat.text}</p>
-                                <span className={`block mt-1 text-right text-[10px] ${chat.sender === 'admin' ? 'text-green-200' : 'text-stone-500'}`}>
+                                    ? 'bg-bakery-black text-white rounded-br-none' 
+                                    : 'bg-white text-stone-800 rounded-tl-none border border-pink-100 shadow-pink-900/5'
+                            }`}>
+                                <p className="text-sm font-medium leading-relaxed">{chat.text}</p>
+                                <span className={`block mt-2 text-[10px] font-black uppercase tracking-tighter ${chat.sender === 'admin' ? 'text-stone-400' : 'text-bakery-pink'}`}>
                                     {formatTime(chat.created_at)}
                                 </span>
                             </div>
@@ -177,23 +173,22 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
                 )}
             </div>
 
-            {/* Chat Input Footer */}
-            <div className="p-4 border-t border-stone-200 bg-white sticky bottom-0 z-10 shadow-lg">
-                <form onSubmit={handleSendReply} className="flex gap-3">
+            {/* Chat Input */}
+            <div className="p-6 bg-white border-t border-pink-100">
+                <form onSubmit={handleSendReply} className="max-w-4xl mx-auto flex gap-4">
                     <input
                         type="text"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="พิมพ์ข้อความตอบกลับ..."
-                        className="flex-1 px-4 py-3 border border-stone-300 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-600 transition-all text-white placeholder-stone-400"
+                        placeholder="พิมพ์ข้อความตอบกลับลูกค้า..."
+                        className="flex-1 px-6 py-4 bg-bakery-cream border border-pink-50 rounded-2xl focus:ring-2 focus:ring-bakery-pink transition-all outline-none font-medium text-bakery-black placeholder-stone-400"
                         autoFocus
                         disabled={sending}
                     />
                     <button
                         type="submit"
                         disabled={replyText.trim() === '' || sending}
-                        className="p-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all duration-200 disabled:bg-stone-300 disabled:cursor-not-allowed shadow-lg flex items-center justify-center"
-                        aria-label="ส่งข้อความ"
+                        className="w-14 h-14 bg-bakery-black text-white rounded-2xl hover:bg-stone-800 hover:scale-105 active:scale-95 transition-all disabled:bg-stone-200 shadow-lg shadow-black/10 flex items-center justify-center"
                     >
                         <Send className="w-6 h-6" />
                     </button>
@@ -205,15 +200,25 @@ const AdminChatView = ({ message, onBack }: { message: ContactMessage, onBack: (
 
 // ========== List Item Components ==========
 
-const Card = ({ icon, title, value, color }: { icon: React.ReactNode, title: string, value: string, color: string }) => (
-    <div className="bg-white p-6 rounded-xl shadow-lg border border-stone-100 flex items-center justify-between transition-transform hover:shadow-xl">
-        <div>
-            <p className="text-sm font-medium text-stone-500">{title}</p>
-            <p className={`text-4xl font-bold mt-1 ${color}`}>{value}</p>
+const StatCard = ({ icon, title, value, variant = 'pink' }: { icon: React.ReactNode, title: string, value: string, variant?: 'pink' | 'black' }) => (
+    <div className={`p-8 rounded-[2rem] border transition-all hover:scale-[1.02] ${
+        variant === 'black' 
+            ? 'bg-bakery-black text-white border-stone-800' 
+            : 'bg-white text-bakery-black border-pink-50 shadow-xl shadow-pink-900/5'
+    }`}>
+        <div className="flex items-center justify-between mb-4">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                variant === 'black' ? 'bg-stone-800 text-white' : 'bg-pink-50 text-bakery-pink'
+            }`}>
+                {icon}
+            </div>
+            <span className={`text-4xl font-black ${variant === 'black' ? 'text-bakery-pink' : 'text-bakery-black'}`}>
+                {value}
+            </span>
         </div>
-        <div className="p-3 bg-stone-100 rounded-full shadow-inner">
-            {icon}
-        </div>
+        <p className={`text-sm font-black uppercase tracking-widest ${variant === 'black' ? 'text-stone-400' : 'text-stone-400'}`}>
+            {title}
+        </p>
     </div>
 );
 
@@ -224,64 +229,61 @@ const MessageItem = ({ message, onClick }: { message: ContactMessage, onClick: (
         const diffMs = now.getTime() - date.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
 
         if (diffMins < 1) return 'เมื่อสักครู่';
         if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
-        if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
-        if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+        if (diffHours < 24) return `${diffHours} ชม. ที่แล้ว`;
         return date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
     };
 
     const isUnread = message.status === 'unread';
     const isReplied = message.status === 'replied';
-    
-    let statusText;
-    let statusColor;
-    let StatusIcon;
-
-    if (isUnread) {
-        statusText = 'ต้องตอบกลับ';
-        statusColor = 'text-red-500';
-        StatusIcon = Clock;
-    } else if (isReplied) {
-        statusText = 'ตอบแล้ว';
-        statusColor = 'text-green-500';
-        StatusIcon = CheckCircle;
-    } else {
-        statusText = 'อ่านแล้ว';
-        statusColor = 'text-stone-400';
-        StatusIcon = Mail;
-    }
 
     return (
         <div 
             onClick={onClick}
-            className={`p-4 rounded-xl cursor-pointer transition-all flex justify-between items-center border shadow-sm ${
-                isUnread ? 'bg-red-50 hover:bg-red-100 border-red-200 border-l-4' : 'bg-white hover:bg-stone-50 border-stone-200'
+            className={`p-6 rounded-[2rem] cursor-pointer transition-all flex items-center gap-6 border group hover:scale-[1.01] ${
+                isUnread 
+                    ? 'bg-white border-bakery-pink shadow-xl shadow-pink-900/5 ring-1 ring-bakery-pink/20' 
+                    : 'bg-white border-pink-50 hover:bg-bakery-cream shadow-sm'
             }`}
         >
-            <div className="flex-1 min-w-0 flex items-center gap-3">
-                <div className="shrink-0">
-                    <StatusIcon className={`w-5 h-5 ${statusColor}`} />
+            <div className="shrink-0 relative">
+                <div className={`w-14 h-14 rounded-[1.25rem] flex items-center justify-center text-white font-black text-xl shadow-lg ${
+                    isUnread ? 'bg-bakery-pink' : 'bg-bakery-black'
+                }`}>
+                    {message.name.charAt(0)}
                 </div>
-                <div className="flex-1 min-w-0">
-                    <p className={`font-semibold truncate ${isUnread ? 'text-red-800' : 'text-stone-700'}`}>
-                        {message.name}
-                    </p>
-                    <p className={`text-sm mt-1 truncate ${isUnread ? 'text-red-600 font-medium' : 'text-stone-500'}`}>
-                        {message.email}
-                    </p>
-                    <p className="text-xs text-stone-400 mt-1 line-clamp-2">
-                        {message.message}
-                    </p>
-                </div>
+                {isUnread && (
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-pink-500 rounded-full border-2 border-white animate-pulse" />
+                )}
             </div>
-            <div className="ml-4 text-right shrink-0">
-                <span className={`text-xs font-medium ${statusColor}`}>
-                    {statusText}
+
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-black text-bakery-black truncate group-hover:text-bakery-pink transition-colors">
+                        {message.name}
+                    </h4>
+                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">
+                        {formatTime(message.created_at)}
+                    </span>
+                </div>
+                <p className="text-xs font-bold text-bakery-pink mb-2 uppercase tracking-tight">{message.email}</p>
+                <p className="text-sm text-stone-500 line-clamp-1 font-medium italic">
+                    "{message.message}"
+                </p>
+            </div>
+
+            <div className="shrink-0 flex flex-col items-end gap-2">
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    isUnread 
+                        ? 'bg-pink-100 text-bakery-pink' 
+                        : isReplied 
+                            ? 'bg-stone-100 text-stone-500' 
+                            : 'bg-stone-50 text-stone-400'
+                }`}>
+                    {isUnread ? 'NEW MESSAGE' : isReplied ? 'REPLIED' : 'READ'}
                 </span>
-                <p className="text-xs text-stone-400 mt-1">{formatTime(message.created_at)}</p>
             </div>
         </div>
     );
@@ -298,7 +300,6 @@ export default function AdminMessagesPage() {
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
 
-    // ดึงข้อมูลข้อความ
     const fetchMessages = async () => {
         try {
             const { data, error } = await supabase
@@ -310,15 +311,13 @@ export default function AdminMessagesPage() {
             setMessages(data || []);
         } catch (error) {
             console.error('Error fetching messages:', error);
-            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อความได้', 'error');
+            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อความได้ค่ะ', 'error');
         } finally {
             setLoading(false);
         }
     };
 
-    // ตรวจสอบสิทธิ์ Admin
     useEffect(() => {
-        // รอให้ auth loading เสร็จก่อน
         if (authLoading) return;
 
         async function checkAdmin() {
@@ -327,35 +326,17 @@ export default function AdminMessagesPage() {
                 return;
             }
 
-            console.log('Checking admin for user:', user.id, user.email);
-
             const { data, error } = await supabase
                 .from('profiles')
                 .select('role')
                 .eq('id', user.id)
                 .single();
 
-            console.log('Profile query result:', { data, error });
-
-            if (error) {
-                console.error('Error fetching profile:', error);
-                showAlert('เกิดข้อผิดพลาด', `ไม่สามารถตรวจสอบสิทธิ์ได้: ${error.message}`, 'error');
+            if (error || !data || data.role !== 'admin') {
+                showAlert('เข้าไม่ได้', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้ค่ะ', 'error', () => router.replace('/'));
                 return;
             }
 
-            if (!data) {
-                console.error('No profile found for user:', user.id);
-                showAlert('เข้าไม่ได้', 'ไม่พบข้อมูลโปรไฟล์ กรุณาติดต่อผู้ดูแลระบบ', 'error', () => router.replace('/'));
-                return;
-            }
-
-            if (data.role !== 'admin') {
-                console.log('User is not admin. Role:', data.role);
-                showAlert('เข้าไม่ได้', 'คุณไม่มีสิทธิ์เข้าถึงหน้านี้!', 'error', () => router.replace('/'));
-                return;
-            }
-
-            console.log('Admin access granted');
             setIsAdmin(true);
             fetchMessages();
         }
@@ -364,17 +345,15 @@ export default function AdminMessagesPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, authLoading, router, showAlert]);
 
-    // คำนวณจำนวนข้อความที่ยังไม่ได้ตอบ
     const unreadCount = messages.filter(msg => msg.status === 'unread').length;
 
-    // ถ้ามีการเลือกข้อความ ให้แสดงหน้า Chat View
     if (selectedMessage) {
         return (
             <AdminChatView
                 message={selectedMessage}
                 onBack={() => {
                     setSelectedMessage(null);
-                    fetchMessages(); // รีเฟรชข้อมูลเมื่อกลับมา
+                    fetchMessages();
                 }}
             />
         );
@@ -382,68 +361,78 @@ export default function AdminMessagesPage() {
 
     if (authLoading || !isAdmin || loading) {
         return (
-            <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-stone-200 border-t-stone-600 rounded-full animate-spin" />
+            <div className="min-h-screen bg-bakery-cream flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-pink-100 border-t-bakery-pink rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-stone-50 p-4 md:p-8 font-sans">
-            <header className="mb-8 border-b pb-4">
-                <h1 className="text-3xl font-extrabold text-stone-900 flex items-center gap-3">
-                    <MessageSquareText className="w-8 h-8 text-green-600" />
-                    ข้อความจากลูกค้า
-                </h1>
-                <p className="text-stone-500 mt-1">ดูและตอบกลับข้อความสอบถามและแชททั้งหมดจากลูกค้า</p>
-            </header>
+        <div className="min-h-screen bg-bakery-cream p-6 md:p-12">
+            <div className="container mx-auto max-w-7xl">
+                <header className="mb-12 space-y-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-bakery-black flex items-center justify-center text-white shadow-lg shadow-black/10">
+                            <MessageSquareText className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h1 className="text-4xl font-black text-bakery-black tracking-tight">ข้อความจากลูกค้า</h1>
+                            <p className="text-stone-500 font-bold uppercase text-[10px] tracking-[0.3em]">Customer Satisfaction Dashboard</p>
+                        </div>
+                    </div>
+                </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Panel 1: Overview Cards */}
-                <div className="lg:col-span-1 space-y-4">
-                    <Card
-                        icon={<Mail className="w-6 h-6 text-green-500" />}
-                        title="ข้อความใหม่ (ต้องตอบกลับ)"
-                        value={unreadCount.toString()}
-                        color={unreadCount > 0 ? "text-red-600" : "text-green-600"}
-                    />
-                    <Card
-                        icon={<Users className="w-6 h-6 text-stone-500" />}
-                        title="ลูกค้าที่ติดต่อทั้งหมด"
-                        value={messages.length.toString()}
-                        color="text-stone-600"
-                    />
-                </div>
-
-                {/* Panel 2: Message List */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-stone-100">
-                    <h2 className="text-xl font-semibold text-stone-800 mb-4 border-b pb-3">
-                        รายการข้อความทั้งหมด
-                    </h2>
-                    <div className="space-y-3">
-                        {messages.map(msg => (
-                            <MessageItem 
-                                key={msg.id} 
-                                message={msg} 
-                                onClick={() => {
-                                    // อัปเดตสถานะเป็น 'read' เมื่อเปิดอ่าน
-                                    if (msg.status === 'unread') {
-                                        supabase
-                                            .from('contact_messages')
-                                            .update({ status: 'read' })
-                                            .eq('id', msg.id);
-                                    }
-                                    setSelectedMessage(msg);
-                                }} 
-                            />
-                        ))}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    {/* Stats */}
+                    <div className="lg:col-span-1 space-y-6">
+                        <StatCard
+                            icon={<Mail className="w-6 h-6" />}
+                            title="ต้องตอบกลับ"
+                            value={unreadCount.toString()}
+                            variant={unreadCount > 0 ? 'pink' : 'black'}
+                        />
+                        <StatCard
+                            icon={<Users className="w-6 h-6 text-stone-500" />}
+                            title="ลูกค้าทั้งหมด"
+                            value={messages.length.toString()}
+                        />
                     </div>
 
-                    {messages.length === 0 && (
-                        <div className="text-center py-10 text-stone-500 bg-stone-50 rounded-lg">
-                            <p>ไม่มีข้อความใหม่ในขณะนี้</p>
+                    {/* Message List */}
+                    <div className="lg:col-span-3">
+                        <div className="flex items-center justify-between mb-8">
+                            <h2 className="text-2xl font-black text-bakery-black">รายการล่าสุด</h2>
+                            <div className="h-0.5 flex-1 mx-8 bg-pink-100 hidden md:block" />
+                            <span className="text-xs font-black text-stone-400">{messages.length} Messages</span>
                         </div>
-                    )}
+
+                        <div className="grid gap-4">
+                            {messages.map(msg => (
+                                <MessageItem 
+                                    key={msg.id} 
+                                    message={msg} 
+                                    onClick={() => {
+                                        if (msg.status === 'unread') {
+                                            supabase
+                                                .from('contact_messages')
+                                                .update({ status: 'read' })
+                                                .eq('id', msg.id);
+                                        }
+                                        setSelectedMessage(msg);
+                                    }} 
+                                />
+                            ))}
+
+                            {messages.length === 0 && (
+                                <div className="text-center py-20 bg-white rounded-[2.5rem] border border-pink-50 shadow-inner">
+                                    <div className="w-20 h-20 bg-bakery-cream rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <Mail className="w-8 h-8 text-stone-300" />
+                                    </div>
+                                    <p className="text-stone-400 font-black uppercase tracking-widest">ยังไม่มีข้อความส่งเข้ามาในขณะนี้</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
